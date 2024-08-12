@@ -49,6 +49,8 @@ public:
 	void setBack(Chunk* chunk);
 	int getBlockCnt();
 	void showChunk(); // test
+	void readFile(string const& path);
+	void updateFile() const;
 
 private:
 	vector<VertexBlockUV> getBlockVertexBlockUV(
