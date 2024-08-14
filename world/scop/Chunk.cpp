@@ -22,8 +22,8 @@ Chunk::Chunk()
 	this->right = nullptr;
 	this->block_cnt = 0;
 	fill(
-		&this->chunk[0][0][0],
-		&this->chunk[0][0][0] + 16 * 256 * 16,
+		this->chunk,
+		this->chunk + 16 * 256 * 16,
 		0
 	);
 }
@@ -32,82 +32,64 @@ Chunk::~Chunk()
 {
 }
 
-void Chunk::setVerticesAndIndices()
+
+void Chunk::vertexAndIndexGenerator(
+	Face const& face, 
+	int const& dx,
+	int const& dy,
+	int const& dz,
+	uint32& idx)
 {
-	VertexBlockUV vertex;
-	uint32 index = 0;
-	for (int z = 0; z < 16; z++) {
-		for (int y = 0; y < 256; y++) {
+	int my = 16 * 16;
+	int mz = 16;
+	
+	for (int y = 0; y < 256; y++) {
+		for (int z = 0; z < 16; z++) {
 			for (int x = 0; x < 16; x++) {
-				if (this->chunk[x][y][z] == 0)
+				int nx = x + dx;
+				int ny = y + dy;
+				int nz = z + dz;
+				if (this->chunk[x + z * mz + y * my] == 0)
 					continue;
-				vector<int> check_arr = this->checkBlock(x, y, z);
-				if (check_arr.size() == 0)
-					continue;
-				this->blocks.insert({ { x, y, z}, true });
-				vector<VertexBlockUV> block_vertices =
-					this->getBlockVertexBlockUV(x, y, z,
-						this->chunk[x][y][z],
-						check_arr
-					);
-				vector<uint32> block_indices =
-					this->getBlockIndices(x, y, z, index,
-						check_arr
-					);
-				this->vertices.insert(
-					this->vertices.end(),
-					block_vertices.begin(),
-					block_vertices.end()
-				);
-				this->indices.insert(
-					this->indices.end(),
-					block_indices.begin(),
-					block_indices.end()
-				);
+				if (this->checkBoundary(nx, ny, nz)) {
+					if (this->getBlock(nx, ny, nz))
+						continue;
+				}
+				else {
+					if (face == Face::Left && this->left && this->getBlock(nx, ny, nz))
+						continue;
+					if (face == Face::Right && this->right && this->getBlock(nx, ny, nz))
+						continue;
+					if (face == Face::Front && this->front && this->getBlock(nx, ny, nz))
+						continue;
+					if (face == Face::Back && this->back && this->getBlock(nx, ny, nz))
+						continue;
+				}
+				this->getBlockFacePosAndTex(static_cast<int>(face), x, y, z,
+					this->chunk[x + z * mz + y * my]);
+				this->getBlockFaceIndices(idx);
+				idx += 4;
 			}
 		}
 	}
 }
 
-void Chunk::updateVerticesAndIndices()
+void Chunk::setVerticesAndIndices2()
 {
 	uint32 index = 0;
-	this->vertices.clear();
-	this->indices.clear();
-	unordered_map<Index3, bool>::iterator it = this->blocks.begin();
-	for (it; it != this->blocks.end(); it++) {
-		vector<int> check_arr = this->checkBlock(
-			it->first.x, it->first.y, it->first.z);
-		vector<VertexBlockUV> block_vertices =
-			this->getBlockVertexBlockUV(
-				it->first.x, it->first.y, it->first.z,
-				this->chunk[it->first.x][it->first.y][it->first.z],
-				check_arr
-			);
-		vector<uint32> block_indices =
-			this->getBlockIndices(
-				it->first.x, it->first.y, it->first.z, 
-				index,
-				check_arr
-			);
-		this->vertices.insert(
-			this->vertices.end(),
-			block_vertices.begin(),
-			block_vertices.end()
-		);
-		this->indices.insert(
-			this->indices.end(),
-			block_indices.begin(),
-			block_indices.end()
-		);
-	}
+	this->vertexAndIndexGenerator(Face::Right, 1, 0, 0, index);
+	this->vertexAndIndexGenerator(Face::Left, -1, 0, 0, index);
+	this->vertexAndIndexGenerator(Face::Front, 0, 0, 1, index);
+	this->vertexAndIndexGenerator(Face::Back, 0, 0, -1, index);
+	this->vertexAndIndexGenerator(Face::Top, 0, 1, 0, index);
+	this->vertexAndIndexGenerator(Face::Bottom, 0, -1, 0, index);
 }
 
 
 
 void Chunk::setBlockInChunk(int x, int y, int z, int16 type)
 {
-	this->chunk[x][y][z] = type;
+	this->chunk[x + z * 16 + y * 16 * 16] = type;
 	this->block_cnt++;
 }
 
@@ -117,32 +99,15 @@ void Chunk::addBlock(Index3, int16 type)
 
 void Chunk::deleteBlock(vector<Index3> const& block_arr)
 {
-	unordered_map<Index3, bool>::iterator it;
-	int dx[] = { 0, 0, 0, 0, -1, 1 };
-	int dy[] = { 1, -1, 0, 0, 0, 0 };
-	int dz[] = { 0, 0, 1, -1, 0, 0 };
-
+	int jz = 16;
+	int jy = 16 * 16;
 	for (int i = 0; i < block_arr.size(); i++) {
-		it = this->blocks.find(block_arr[i]);
-		if (it == this->blocks.end())
-			continue;
-		vector<int> move_arr = this->checkBlockReverse(
-			block_arr[i].x,
-			block_arr[i].y,
-			block_arr[i].z
-		);
-		for (int j = 0; j < move_arr.size(); j++) {
-			int nx = block_arr[i].x + dx[move_arr[j]];
-			int ny = block_arr[i].y + dy[move_arr[j]];
-			int nz = block_arr[i].z + dz[move_arr[j]];
-			unordered_map<Index3, bool>::iterator itt = this->blocks.find({ nx, ny, nz });
-			if (itt == this->blocks.end())
-				this->blocks.insert({ {nx, ny, nz}, true });
-		}
-		this->chunk[block_arr[i].x][block_arr[i].y][block_arr[i].z] = 0;
-		this->blocks.erase(it);
+		this->chunk[block_arr[i].x + 
+			block_arr[i].y * jy + block_arr[i].z * jz] = 0;
 	}
-	this->updateVerticesAndIndices();
+	this->indices.clear();
+	this->vertices.clear();
+	this->setVerticesAndIndices2();
 }
 
 int Chunk::getBlock(int x, int y, int z) const
@@ -155,7 +120,7 @@ int Chunk::getBlock(int x, int y, int z) const
 		return this->back->getBlock(x, y, 16 + z);
 	if (z >= 16)
 		return this->front->getBlock(x, y, z % 16);
-	return this->chunk[x][y][z];
+	return this->chunk[x + y * 16 * 16 + z * 16];
 }
 
 void Chunk::setStartPos(float x, float y, float z)
@@ -185,61 +150,7 @@ int Chunk::getBlockCnt()
 	return this->block_cnt;
 }
 
-vector<VertexBlockUV> Chunk::getBlockVertexBlockUV(
-	int x,
-	int y,
-	int z,
-	int type,
-	vector<int> const& check_arr
-) const
-{
-	vector<VertexBlockUV> cube_vertices;
-	vec2 start = vec2(0.f, 0.f);
-	vec2 end = vec2(1.f, 1.f);
 
-	for (int i = 0; i < check_arr.size(); i++) {
-		Face flag = static_cast<Face>(check_arr[i]);
-		VertexBlockUV tmp_vertex;
-		vector<vec3> positions;
-		vector<vec2> texcoords;
-		positions = this->getBlockFacePos(x, y, z, flag);
-		texcoords = this->getBlockFaceTexcoord(
-			start,
-			end,
-			flag
-		);
-		for (int j = 0; j < 4; j++) {
-			tmp_vertex.type = type;
-			tmp_vertex.pos = positions[j];
-			tmp_vertex.uv = texcoords[j];
-			tmp_vertex.dir = check_arr[i];
-			cube_vertices.push_back(tmp_vertex);
-		}
-	}
-	return cube_vertices;
-}
-
-vector<uint32> Chunk::getBlockIndices(
-	int x,
-	int y,
-	int z,
-	uint32& start,
-	vector<int> const& check_arr
-) const
-{
-	vector<uint32> block_indices;
-	for (int i = 0; i < check_arr.size(); i++) {
-		vector<uint32> face_indices;
-		face_indices = this->getBlockFaceIndices(start);
-		start += 4;
-		block_indices.insert(
-			block_indices.end(),
-			face_indices.begin(),
-			face_indices.end()
-		);
-	}
-	return block_indices;
-}
 
 bool Chunk::checkBoundary(int x, int y, int z) const
 {
@@ -259,174 +170,97 @@ void defineTrueFace(vector<int>& vec, int flag, int idx) {
 }
 
 
-vector<int> Chunk::checkBlock(int x, int y, int z) const
+void Chunk::getBlockFacePosAndTex(
+	int dir, 
+	float x, 
+	float y, 
+	float z, 
+	int type
+)
 {
-	vector<int> face_arr;
-	int dx[] = { 0, 0, 0, 0, -1, 1 };
-	int dy[] = { 1, -1, 0, 0, 0, 0 };
-	int dz[] = { 0, 0, 1, -1, 0, 0 };
-	for (int i = 0; i < 6; i++) {
-		int nx = x + dx[i];
-		int ny = y + dy[i];
-		int nz = z + dz[i];
-		if (this->checkBoundary(nx, ny, nz))
-			defineTrueFace(face_arr, this->chunk[nx][ny][nz], i);
-		else {
-			if (ny < 0 || ny >= 256)
-				face_arr.push_back(i);
-			else if (nx < 0 && this->left == nullptr)
-				face_arr.push_back(i);
-			else if (nx >= 16 && this->right == nullptr)
-				face_arr.push_back(i);
-			else if (nz < 0 && this->back == nullptr)
-				face_arr.push_back(i);
-			else if (nz >= 16 && this->front == nullptr)
-				face_arr.push_back(i);
-			else
-				defineTrueFace(face_arr, this->getBlock(nx, ny, nz), i);
-		}
-	}
-	return face_arr;
-}
+	static vector<vec3> sample_pos = {
+		{-0.5f, +0.5f, -0.5f},
+		{-0.5f, +0.5f, +0.5f},
+		{+0.5f, +0.5f, +0.5f},
+		{+0.5f, +0.5f, -0.5f},
 
-vector<int> Chunk::checkBlockReverse(int x, int y, int z) const
-{
-	vector<int> face_arr;
-	int dx[] = { 0, 0, 0, 0, -1, 1 };
-	int dy[] = { 1, -1, 0, 0, 0, 0 };
-	int dz[] = { 0, 0, 1, -1, 0, 0 };
-	for (int i = 0; i < 6; i++) {
-		int nx = x + dx[i];
-		int ny = y + dy[i];
-		int nz = z + dz[i];
-		if (this->checkBoundary(nx, ny, nz)) {
-			if (this->chunk[nx][ny][nz])
-				face_arr.push_back(i);
-		}
-	}
-	return face_arr;
-}
+		{-0.5f, -0.5f, -0.5f},
+		{+0.5f, -0.5f, -0.5f},
+		{+0.5f, -0.5f, +0.5f},
+		{-0.5f, -0.5f, +0.5f},
 
-vector<vec3> Chunk::getBlockFacePos
-(
-	float x,
-	float y,
-	float z,
-	Face block_face
-) const
-{
-	vector<vec3> vertices_pos;
+		{-0.5f, -0.5f, -0.5f},
+		{-0.5f, +0.5f, -0.5f},
+		{+0.5f, +0.5f, -0.5f},
+		{+0.5f, -0.5f, -0.5f},
+
+		{-0.5f, -0.5f, +0.5f},
+		{+0.5f, -0.5f, +0.5f},
+		{+0.5f, +0.5f, +0.5f},
+		{-0.5f, +0.5f, +0.5f},
+
+		{-0.5f, -0.5f, +0.5f},
+		{-0.5f, +0.5f, +0.5f},
+		{-0.5f, +0.5f, -0.5f},
+		{-0.5f, -0.5f, -0.5f},
+
+		{+0.5f, -0.5f, +0.5f},
+		{+0.5f, -0.5f, -0.5f},
+		{+0.5f, +0.5f, -0.5f},
+		{+0.5f, +0.5f, +0.5f}
+	};
+	static vector<vec2> sample_uv = {
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f},
+		{1.f, 1.f},
+
+		{0.f, 0.f},
+		{1.f, 0.f},
+		{1.f, 1.f},
+		{0.f, 1.f},
+
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f},
+		{1.f, 1.f},
+
+		{1.f, 1.f},
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f},
+
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f},
+		{1.f, 1.f},
+
+		{1.f, 1.f},
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f}
+	};
+	VertexBlockUV vertex;
 	x = this->start_pos.x + x;
 	y = this->start_pos.y + y;
 	z = this->start_pos.z - z;
-	if (block_face == Face::Top) {
-		vertices_pos.push_back(vec3(x - 0.5f, y + 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y + 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y + 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y + 0.5f, z - 0.5f));
-		return vertices_pos;
+	for (int i = dir * 4; i < dir * 4 + 4; i++) {
+		vertex.pos = sample_pos[i] + vec3(x, y, z);
+		vertex.uv = sample_uv[i];
+		vertex.type = type;
+		vertex.dir = dir;
+		this->vertices.push_back(vertex);
 	}
-	if (block_face == Face::Bottom) {
-		vertices_pos.push_back(vec3(x - 0.5f, y - 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y - 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y - 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y - 0.5f, z + 0.5f));
-		return vertices_pos;
-	}
-	if (block_face == Face::Front) {
-		vertices_pos.push_back(vec3(x - 0.5f, y - 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y + 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y + 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y - 0.5f, z - 0.5f));
-		return vertices_pos;
-	}
-	if (block_face == Face::Back) {
-		vertices_pos.push_back(vec3(x - 0.5f, y - 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y - 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y + 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y + 0.5f, z + 0.5f));
-		return vertices_pos;
-	}
-	if (block_face == Face::Left) {
-		vertices_pos.push_back(vec3(x - 0.5f, y - 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y + 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y + 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x - 0.5f, y - 0.5f, z - 0.5f));
-		return vertices_pos;
-	}
-	if (block_face == Face::Right) {
-		vertices_pos.push_back(vec3(x + 0.5f, y - 0.5f, z + 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y - 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y + 0.5f, z - 0.5f));
-		vertices_pos.push_back(vec3(x + 0.5f, y + 0.5f, z + 0.5f));
-	}
-	return vertices_pos;
 }
 
-vector<vec2> Chunk::getBlockFaceTexcoord
-(
-	vec2 start,
-	vec2 end,
-	Face block_face
-) const
+void Chunk::getBlockFaceIndices(uint32 start)
 {
-	vector<vec2> texcoord;
-
-	if (block_face == Face::Top) {
-		texcoord.push_back(vec2(start.x, end.y));
-		texcoord.push_back(start);
-		texcoord.push_back(vec2(end.x, start.y));
-		texcoord.push_back(end);
-		return texcoord;
-	}
-	if (block_face == Face::Bottom) {
-		texcoord.push_back(start);
-		texcoord.push_back(vec2(end.x, start.y));
-		texcoord.push_back(end);
-		texcoord.push_back(vec2(start.x, end.y));
-		return texcoord;
-	}
-	if (block_face == Face::Front) {
-		texcoord.push_back(vec2(start.x, end.y));
-		texcoord.push_back(start);
-		texcoord.push_back(vec2(end.x, start.y));
-		texcoord.push_back(end);
-		return texcoord;
-	}
-	if (block_face == Face::Back) {
-		texcoord.push_back(end);
-		texcoord.push_back(vec2(start.x, end.y));
-		texcoord.push_back(start);
-		texcoord.push_back(vec2(end.x, start.y));
-		return texcoord;
-	}
-	if (block_face == Face::Left) {
-		texcoord.push_back(vec2(start.x, end.y));
-		texcoord.push_back(start);
-		texcoord.push_back(vec2(end.x, start.y));
-		texcoord.push_back(end);
-		return texcoord;
-	}
-	if (block_face == Face::Right) {
-		texcoord.push_back(end);
-		texcoord.push_back(vec2(start.x, end.y));
-		texcoord.push_back(start);
-		texcoord.push_back(vec2(end.x, start.y));
-	}
-	return texcoord;
-}
-
-vector<uint32> Chunk::getBlockFaceIndices(uint32 start) const
-{
-	vector<uint32> indices = {
-		start,
-		start + 1,
-		start + 2,
-		start,
-		start + 2,
-		start + 3
-	};
-	return indices;
+	this->indices.push_back(start);
+	this->indices.push_back(start + 1);
+	this->indices.push_back(start + 2);
+	this->indices.push_back(start);
+	this->indices.push_back(start + 2);
+	this->indices.push_back(start + 3);
 }
 
 
@@ -604,10 +438,11 @@ void Chunk::readFile(string const& path)
 	int flag = 0;
 	char buffer[200];
 	VertexBlockUV vertex;
-
+	int jy = 16 * 16;
+	int jz = 16;
 	fill(
-		&this->chunk[0][0][0],
-		&this->chunk[0][0][0] + 16 * 256 * 16,
+		this->chunk,
+		this->chunk + 16 * 256 * 16,
 		0
 	);
 	this->vertices = {};
@@ -622,15 +457,15 @@ void Chunk::readFile(string const& path)
 	this->start_pos.y = 0.5f;
 	getline(stream, token, ',');
 	this->start_pos.z = stof(token);
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 256; j++) {
+	for (int j = 0; j < 256; j++) {
+		for (int i = 0; j < 16; i++) {
 			ifile.getline(buffer, 200);
 			str = buffer;
 			stream.clear();
 			stream.str(str);
 			int idx = 0;
 			while (getline(stream, token, ',')) {
-				this->chunk[i][j][idx] = stoi(token);
+				this->chunk[i * jz + j * jy + idx] = stoi(token);
 				idx++;
 			}
 		}
@@ -686,6 +521,8 @@ void Chunk::readFile(string const& path)
 
 void Chunk::updateFile() const
 {
+	int jy = 16 * 16;
+	int jz = 16;
 	string file_name = "../chunk_files/";
 	file_name = file_name + to_string(this->start_pos.x) + "_"
 		+ to_string(this->start_pos.z) + ".txt";
@@ -695,11 +532,11 @@ void Chunk::updateFile() const
 	str += to_string(this->start_pos.y) + ",";
 	str += to_string(this->start_pos.z) + "\n";
 	ofile.write(str.c_str(), str.size());
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 256; j++) {
+	for (int j = 0; j < 256; j++) {
+		for (int i = 0; i < 16; i++) {
 			str = "";
 			for (int k = 0; k < 16; k++) {
-				str += to_string(this->chunk[i][j][k]);
+				str += to_string(this->chunk[i * jz + j * jy + k]);
 				if (k == 15)
 					str += '\n';
 				else

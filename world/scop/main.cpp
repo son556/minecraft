@@ -43,7 +43,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     Terrain terrain(hWnd, 800, 650);
     Mat view = XMMatrixLookToLH(
         vec3(0, 50, -50),
+        //vec3(0, 50, 0),
         XMVector3Normalize(vec3(0, -1, 1.f)),
+        //XMVector3Normalize(vec3(0, -1, 0.000001f)),
         vec3(0, 1, 0)
     );
     Mat proj = XMMatrixPerspectiveFovLH(
@@ -62,7 +64,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     terrain.terrainsetVerticesAndIndices();
     finish = clock();
     cout << "time(ms) vertices and indices: " << static_cast<double>(finish - start) << endl;
-    terrain.updateTerrainForTest();
+    //terrain.updateTerrainForTest();
     terrain.setRender();
     // test code
 
