@@ -28,7 +28,7 @@ float4 main(PS_INPUT input) : SV_TARGET
         uvw = float3(input.uv, input.dir + offset);
     else
         uvw = float3(input.uv, 2 + offset);
-
+    
     float2 dvec = float2(input.world_pos.x - pos.x, 
         input.world_pos.z - pos.z);
     float d = sqrt(pow(dvec.x, 2) + pow(dvec.y, 2));
