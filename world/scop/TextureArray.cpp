@@ -178,6 +178,7 @@ void ReadImage(const std::string filename, std::vector<uint8_t>& image,
 		std::cout << "Read 3 or 4 channels images only. " << channels
 			<< " channels" << endl;
 	}
+	delete img;
 }
 
 // mipmap 적용
@@ -229,16 +230,24 @@ TextureArray::TextureArray(
             auto& image = imageArray[i];
 
             // StagingTexture는 Texture2DArray가 아니라 Texture2D 입니다.
-            ComPtr<ID3D11Texture2D> stagingTexture =
-                CreateStagingTexture(device, context, width, height, image, 1, 1);
+           /* ComPtr<ID3D11Texture2D> stagingTexture =
+                CreateStagingTexture(device, context, width, height, image, 1, 1);*/
 
             // 스테이징 텍스춰를 텍스춰 배열의 해당 위치에 복사합니다.
             UINT subresourceIndex =
                 D3D11CalcSubresource(0, UINT(i), txtDesc.MipLevels);
 
-            context->CopySubresourceRegion(this->texture_arr.Get(), 
+			context->UpdateSubresource(
+				this->texture_arr.Get(),
+				subresourceIndex,
+				nullptr,
+				image.data(),
+				width * 4,
+				width * height * 4
+			);
+			/*context->CopySubresourceRegion(this->texture_arr.Get(), 
 				subresourceIndex, 0, 0, 0,
-                stagingTexture.Get(), 0, nullptr);
+                stagingTexture.Get(), 0, nullptr);*/
         }
 
         device->CreateShaderResourceView(
