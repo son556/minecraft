@@ -149,7 +149,7 @@ void Terrain::createHeightMap()
 		for (int j = 0; j < this->size_w * 16; j++) {
 			int nx = j / 16;
 			x = (j + this->start_pos.x) / 32;
-			double res = this->perlin_noise.getNoise2D(x, z, 3, 0.5f);
+			double res = this->perlin_noise.getNoise2D(x, z, 3, 0.5);
 			int16 h = static_cast<int16>(((res + 1.f) * 0.5f) * 30.f);
 			this->terrain[nz][nx]->setHeight(j % 16, i % 16, h);
 			for (int y = 0; y < h; y++)

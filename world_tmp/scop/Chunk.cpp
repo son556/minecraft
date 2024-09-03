@@ -118,15 +118,17 @@ void Chunk::deleteBlock(vector<Index3> const& block_arr)
 
 int Chunk::getBlock(int x, int y, int z) const
 {
-	if (x < 0)
+	if (x == -1)
 		return this->left->getBlock(16 + x, y, z);
-	if (x >= 16)
+	if (x == 16)
 		return this->right->getBlock(x % 16, y, z);
-	if (z < 0)
+	if (z  == -1)
 		return this->back->getBlock(x, y, 16 + z);
-	if (z >= 16)
+	if (z == 16)
 		return this->front->getBlock(x, y, z % 16);
-	return this->chunk[x + y * 16 * 16 + z * 16];
+	if (x >= 0 && x < 16 && y >= 0 && y < 256 && z >= 0 && z < 256)
+		return this->chunk[x + y * 16 * 16 + z * 16];
+	return 0;
 }
 
 void Chunk::setStartPos(float x, float y, float z)
