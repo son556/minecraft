@@ -44,11 +44,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SCOP));
 
     // test code
-    clock_t start, finish;
-    start = clock();
-    Terrain terrain(8, 8, hWnd, 800, 650);
-    finish = clock();
-    cout << "time(ms) map: " << static_cast<double>(finish - start) << endl;
+    Terrain terrain(1, 1, hWnd, 800, 650);
     cam.setDir(vec3(0, -1, 0.0000001f));
     cam.movePos(0, 50.f, 0.f);
     Mat view = XMMatrixLookAtLH(vec3(0, 60.f, 0.f), 

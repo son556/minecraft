@@ -83,7 +83,7 @@ void Chunk::setVerticesIdx(uint32 idx)
 	this->vertices_idx = idx;
 }
 
-void Chunk::addBlock(Index3 idx3, int16 type)
+void Chunk::addBlock(Index3 const& idx3, int16 type)
 {
 	this->chunk[idx3.x + idx3.y * 16 * 16 + idx3.z * 16] = type;
 	this->block_cnt++;

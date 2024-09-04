@@ -153,8 +153,8 @@ void ReadImage(const std::string filename, std::vector<uint8_t>& image,
 
 	// assert(channels == 4);
 
-	cout << filename << " " << width << " " << height << " " << channels
-		<< endl;
+	/*cout << filename << " " << width << " " << height << " " << channels
+		<< endl;*/
 
 	// 4채널로 만들어서 복사
 	image.resize(width * height * 4);

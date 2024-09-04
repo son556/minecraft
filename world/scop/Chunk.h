@@ -29,7 +29,7 @@ public: // info
 
 public: // setting & add & delete
 	void setVerticesIdx(uint32 idx);
-	void addBlock(Index3 idx3, int16 type);
+	void addBlock(Index3 const& idx3, int16 type);
 	void addBlock(int x, int y, int z, int16 type);
 	void setHeight(int x, int y, int16 h);
 	void setHeight(Index2 const& idx2, int16 h);

@@ -16,7 +16,6 @@ public:
 	int getBlock(float x, float y, float z) const;
 
 public: // test func & temp func
-	void testFillChunk();
 	void Render(Mat const& proj, Mat const& view, vec3 const& pos);
 	void setRender();
 
@@ -24,17 +23,17 @@ private:
 	WorldIndex getBlockIndex(float x, float y, float z) const;
 	int checkTerrainBoundary(float x, float z) const;
 	Index2 getChunkIndex(float w_x, float w_z) const;
-	void fillChunk(vec2 chunk_pos);
+	void fillChunk(vec2 const& chunk_pos);
 	void createHeightMap();
 	void terrainsetVerticesAndIndices();
 	void vertexAndIndexGenerator(
-		vec2 const& pos,
+		Index2 const& c_idx,
 		Index3 const& move,
 		int dir,
 		vector<VertexBlockUV>& vertices,
 		vector<uint32>& indices
 	);
-	int getBlockByIndex(Index3 const& b_idx, Index2 const& c_idx) const;
+	int getBlockByIndex(Index3 const& b_idx, Index2 const& c_idx);
 private:
 	vec2 start_pos;
 	vec2 end_pos;

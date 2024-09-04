@@ -29,9 +29,15 @@ Terrain::Terrain(
 	this->start_pos.y = 16 * (this->size_h / 2.f);
 	this->end_pos = -this->start_pos;
 	this->graphic = make_shared<Graphics>(hwnd, width, height);
-	//this->testFillChunk();
+	clock_t start, finish;
+	start = clock();
 	this->createHeightMap();
+	finish = clock();
+	cout << "set height(ms): " << static_cast<double>(finish - start) << endl;
+	start = clock();
 	this->terrainsetVerticesAndIndices();
+	finish = clock();
+	cout << "set vi(ms): " << static_cast<double>(finish - start) << endl;
 }
 
 Terrain::~Terrain()
@@ -63,7 +69,7 @@ Index2 Terrain::getChunkIndex(float w_x, float w_z) const
 	return ans;
 }
 
-void Terrain::fillChunk(vec2 chunk_pos)
+void Terrain::fillChunk(vec2 const& chunk_pos)
 {
 	Index2 c_idx;
 	c_idx = this->getChunkIndex(chunk_pos.x, chunk_pos.y);
@@ -80,26 +86,6 @@ void Terrain::fillChunk(vec2 chunk_pos)
 			this->chunks[c_idx.y][c_idx.x]->setHeight(j, i, h);
 			for (int y = 0; y < h; y++) {
 				this->chunks[c_idx.y][c_idx.x]->addBlock(j, y, i, 1);
-			}
-		}
-	}
-}
-
-void Terrain::testFillChunk()
-{
-	for (int i = 0; i < this->size_h; i++) {
-		for (int j = 0; j < this->size_w; j++) {
-			vec2 pos = this->start_pos + vec2(j * 16, -i * 16);
-			Index2 c_idx;
-			c_idx = this->getChunkIndex(pos.x, pos.y);
-			this->chunks[c_idx.y][c_idx.x] = make_shared<Chunk>();
-			this->chunks[c_idx.y][c_idx.x]->setStartPos(pos.x, 0, pos.y);
-			for (int z = 0; z < 16; z++) {
-				for (int x = 0; x < 16; x++) {
-					this->chunks[c_idx.y][c_idx.x]->setHeight(x, z, 30);
-					for (int y = 0; y < 30; y++)
-						this->chunks[c_idx.y][c_idx.x]->addBlock(x, y, z, 1);
-				}
 			}
 		}
 	}
@@ -174,7 +160,7 @@ void Terrain::setRender()
 			D3D11_INPUT_PER_VERTEX_DATA,
 			0
 		},
-		{
+		/*{
 			"CHUNKIDX",
 			0,
 			DXGI_FORMAT_R32G32_SINT,
@@ -182,11 +168,11 @@ void Terrain::setRender()
 			28,
 			D3D11_INPUT_PER_VERTEX_DATA,
 			0
-		}
+		}*/
 	};
 	this->vertex_shader = make_shared<VertexShader>(
 		this->graphic->getDevice(),
-		L"TestVertexShader2.hlsl",
+		L"TestVertexShader.hlsl",
 		"main",
 		"vs_5_0"
 	);
@@ -198,7 +184,7 @@ void Terrain::setRender()
 	);
 	this->pixel_shader = make_shared<PixelShader>(
 		this->graphic->getDevice(),
-		L"TestPixelShader2.hlsl",
+		L"TestPixelShader.hlsl",
 		"main",
 		"ps_5_0"
 	);
@@ -295,7 +281,7 @@ void Terrain::Render
 int Terrain::getBlockByIndex(
 	Index3 const& b_idx, 
 	Index2 const& c_idx
-) const
+)
 {
 	vec3 pos = this->chunks[c_idx.y][c_idx.x]->getChunkPos();
 	vec3 adj;
@@ -340,14 +326,13 @@ int Terrain::getBlockByIndex(
 }
 
 void Terrain::vertexAndIndexGenerator(
-	vec2 const& pos,
+	Index2 const& c_idx,
 	Index3 const& move,
 	int dir,
 	vector<VertexBlockUV>& vertices,
 	vector<uint32>& indices
 )
 {
-	Index2 c_idx = this->getChunkIndex(pos.x, pos.y);
 	uint32 index = this->chunks[c_idx.y][c_idx.x]->getVerticesIdx();
 	vec3 s_pos = this->chunks[c_idx.y][c_idx.x]->getStartPos();
 	for (int y = 0; y < 256; y++) {
@@ -385,17 +370,18 @@ void Terrain::terrainsetVerticesAndIndices()
 		Index3(-1, 0, 0),
 		Index3(1, 0, 0)
 	};
-	for (int i = 1; i < this->size_h - 1; i++) {
-		for (int j = 1; j < this->size_w - 1; j++) {
-			vec2 c_pos = this->start_pos + vec2(16 * j, -16 * i);
-			Index2 c_idx = this->getChunkIndex(c_pos.x, c_pos.y);
+	for (int i = 0; i < this->size_h; i++) {
+		for (int j = 0; j < this->size_w; j++) {
+			/*vec2 c_pos = this->start_pos + vec2(16 * j, -16 * i);
+			Index2 c_idx = this->getChunkIndex(c_pos.x, c_pos.y);*/
+			Index2 c_idx(j, i);
 			vector<VertexBlockUV> vertices;
 			vector<uint32> indices;
 			for (int dir = 0; dir < 6; dir++) {
 				this->vertexAndIndexGenerator(
-					c_pos,
-					move_arr[dir],
-					dir,
+					c_idx,
+					move_arr[5 - dir],
+					5 - dir,
 					vertices,
 					indices
 				);

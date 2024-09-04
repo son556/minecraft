@@ -44,13 +44,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SCOP));
 
     // test code
-    Terrain terrain(hWnd, 800, 650);
     cam.setDir(vec3(0, -1, 0.0000001f));
     cam.movePos(0, 50.f, 0.f);
     Mat view = XMMatrixLookAtLH(vec3(0, 60.f, 0.f), 
         vec3(0, -1, 0.00001f), vec3(0, 1, 0));
-    terrain.setSightChunk(1);
     clock_t start, finish;
+    Terrain terrain(hWnd, 800, 650);
+    terrain.setSightChunk(1);
     start = clock();
     terrain.createHeightMap();
     finish = clock();
