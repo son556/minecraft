@@ -9,8 +9,8 @@ namespace Block {
 		float y,
 		float z,
 		int type,
-		int idx_i,
-		int idx_j,
+		/*int idx_i,
+		int idx_j,*/
 		vector<VertexBlockUV>& vertices
 	)
 	{
