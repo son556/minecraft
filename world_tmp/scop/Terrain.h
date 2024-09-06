@@ -41,8 +41,8 @@ private:
 	PerlinNoise perlin_noise;
 	vec2 start_pos;
 	vec2 end_pos;
-	int size_w = 2;
-	int size_h = 2;
+	int size_w = 8;
+	int size_h = 8;
 	int sight_r = 1;
 
 private:
