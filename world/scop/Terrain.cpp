@@ -18,25 +18,32 @@
 #include <time.h>
 
 Terrain::Terrain(
-	int size_w, 
-	int size_h, 
-	HWND hwnd, 
-	UINT width, 
-	UINT height
+	int size_w,
+	int size_h,
+	HWND hwnd,
+	UINT width,
+	UINT height,
+	int fov_chunk,
+	int thread_cnt
 )
 {
 	this->size_h = size_h;
 	this->size_w = size_w;
-	this->start_pos.x = -16 * (this->size_w / 2.f);
-	this->start_pos.y = 16 * (this->size_h / 2.f);
+
 	this->s_pos.x = -8 * this->size_w;
 	this->s_pos.y = 8 * this->size_h;
-	this->end_pos = -this->start_pos;
+	this->sv_pos.x = this->s_pos.x + 16;
+	this->sv_pos.y = this->s_pos.y - 16;
+	this->ev_pos.x = -this->sv_pos.x;
+	this->ev_pos.y = -this->sv_pos.y;
+
 	this->graphic = make_shared<Graphics>(hwnd, width, height);
 	this->blocks = new int[16 * 16 * size_h * size_w * 256];
 	this->b_arr_size = 16 * 16 * size_h * size_w * 256;
 	this->h_arr_size = 16 * 16 * size_h * size_w;
 	this->h_map = new int[16 * 16 * size_h * size_w];
+	this->c_fov = fov_chunk;
+	this->thread_cnt = thread_cnt;
 	fill(this->blocks, this->blocks + 16 * 16 * size_h * size_w * 256, 0);
 	fill(this->h_map, this->h_map + 16 * 16 * size_h * size_w, 0);
 	clock_t start, finish;
@@ -59,12 +66,8 @@ Terrain::~Terrain()
 Index2 Terrain::getChunkIndex(int w_x, int w_z) const
 {
 	int t = w_x / 16;
-	if (t * 16 > w_x)
-		t -= 1;
 	int x = (t % size_w + size_w) % size_w;
 	t = w_z / 16;
-	if (t * 16 < w_z)
-		t += 1;
 	int z = (t % size_h + size_h) % size_h;
 	Index2 ans = Index2(x, z);
 	return ans;
@@ -73,41 +76,30 @@ Index2 Terrain::getChunkIndex(int w_x, int w_z) const
 Index2 Terrain::findChunkIndex(int w_x, int w_z) const
 {
 	int t = w_x / 16;
-	if (t * 16 > w_x)
-		t -= 1;
 	int x = (t % size_w + size_w) % size_w;
 	t = w_z / 16;
-	if (t * 16 < w_z)
-		t += 1;
 	int z = (t % size_h + size_h) % size_h;
 	Index2 ans = Index2(x, z);
 	Index2 pos = this->chunks[ans.y][ans.x]->chunk_pos;
-	int ez = pos.y - 16;
-	int ex = pos.x + 16;
-	if (w_x < pos.x || w_x > ex || w_z < ez || w_z > pos.y) {
+	if (pos.x != w_x || pos.y != w_z)
 		ans.flag = false;
-	}
 	return ans;
 }
 
-void Terrain::fillChunk(Index2 const& chunk_pos)
+void Terrain::fillChunk(Index2 const& c_idx, Index2 const& c_pos)
 {
-	Index2 c_idx;
-	c_idx = this->getChunkIndex(chunk_pos.x, chunk_pos.y);
-	this->chunks[c_idx.y][c_idx.x] = make_shared<Chunk>();
-	this->chunks[c_idx.y][c_idx.x]->start_pos = 
-		vec3(chunk_pos.x + 0.5f, 0.5f, chunk_pos.y - 0.5f);
-	this->chunks[c_idx.y][c_idx.x]->chunk_pos = chunk_pos;
 	float x, z;
-	float offset = 0.000001;
+	float offset = 0.000001f;
 	for (int i = 0; i < 16; i++) {
-		z = (chunk_pos.y - i + offset) / 32;
+		z = (c_pos.y - i + offset) / 32.f;
 		for (int j = 0; j < 16; j++) {
-			x = (chunk_pos.x + j + offset) / 32;
+			x = (c_pos.x + j + offset) / 32.f;
 			double h_ = this->perlin_noise.getNoise2D(x, z, 3, 0.5);
-			int16 h = static_cast<int16>((h_ + 1) * 0.5 * 30.f);
+			int16 h = static_cast<int16>((h_ + 0.8) * 0.5 * 30.f);
 			this->setHeight(c_idx, j, i, h);
-			for (int y = 0; y < h; y++) {
+			for (int y = 0; y < 10; y++)
+				this->addBlock(c_idx, j, y, i, 1);
+			for (int y = 10; y < h; y++) {
 				this->addBlock(c_idx, j, y, i, 1);
 			}
 		}
@@ -119,7 +111,13 @@ void Terrain::createHeightMap()
 	for (int i = 0; i < this->size_h; i++) {
 		for (int j = 0; j < this->size_w; j++) {
 			Index2 c_pos = this->s_pos + Index2(j * 16, -i * 16);
-			this->fillChunk(c_pos);
+			Index2 c_idx;
+			c_idx = this->getChunkIndex(c_pos.x, c_pos.y);
+			this->chunks[c_idx.y][c_idx.x] = make_shared<Chunk>();
+			this->chunks[c_idx.y][c_idx.x]->start_pos =
+				vec3(c_pos.x + 0.5f, 0.5f, c_pos.y - 0.5f);
+			this->chunks[c_idx.y][c_idx.x]->chunk_pos = c_pos;
+			this->fillChunk(c_idx, c_pos);
 		}
 	}
 }
@@ -349,7 +347,11 @@ void Terrain::vertexAndIndexGenerator(
 	this->chunks[c_idx.y][c_idx.x]->vertices_idx = index;
 }
 
-void Terrain::chunksSetVerticesAndIndices(vector<Index2> const& v_idx)
+void Terrain::chunksSetVerticesAndIndices(
+	vector<Index2> const& v_idx, 
+	int st, 
+	int ed
+)
 {
 	static const Index3 move_arr[6] = {
 		Index3(0, 1, 0),
@@ -359,11 +361,12 @@ void Terrain::chunksSetVerticesAndIndices(vector<Index2> const& v_idx)
 		Index3(-1, 0, 0),
 		Index3(1, 0, 0)
 	};
-	for (int i = 0; i < v_idx.size(); i++) {
+	vector<VertexBlockUV> vertices;
+	vector<uint32> indices;
+	ed = min(ed, v_idx.size());
+	for (int i = st; i < ed; i++) {
 		Index2 const& c_idx = v_idx[i];
 		Index2 apos = this->chunks[c_idx.y][c_idx.x]->chunk_pos;
-		vector<VertexBlockUV> vertices;
-		vector<uint32> indices;
 		for (int dir = 0; dir < 6; dir++) {
 			Index2 pos = apos + Index2(16 * move_arr[5 - dir].x,
 				-16 * move_arr[5 - dir].z);
@@ -382,45 +385,47 @@ void Terrain::chunksSetVerticesAndIndices(vector<Index2> const& v_idx)
 			vertices,
 			indices
 		);
+		vertices.clear();
+		indices.clear();
 	}
 }
 
 void Terrain::terrainsetVerticesAndIndices()
 {
-	int t_cnt = 8;// 최적의 스레드 사용하도록
-	vector<vector<Index2>> vv_idxs(t_cnt);
-	int t = this->size_h * this->size_w / t_cnt;
-	if (t * t_cnt < this->size_h * this->size_w)
-		t += 1;
-	int cnt = 0;
-	int flag = 0;
-	for (int i = 0; i < this->size_h; i++) {
-		for (int j = 0; j < this->size_w; j++) {
+	vector<Index2> v_idxs;
+	int c_cnt = (this->size_h - 2) * (this->size_w - 2);
+	int t = c_cnt / this->thread_cnt;
+	int m = c_cnt % this->thread_cnt;
+
+	for (int i = 1; i < this->size_h - 1; i++) {
+		for (int j = 1; j < this->size_w - 1; j++) {
 			Index2 pos = this->s_pos + Index2(16 * j, -16 * i);
 			Index2 c_idx = this->findChunkIndex(pos.x, pos.y);
-			vv_idxs[cnt].push_back(c_idx);
-			if (flag)
-				cnt++;
-			if (vv_idxs[cnt].size() == t) {
-				cnt++;
-				if (cnt == t_cnt) {
-					cnt = 0;
-					flag = 1;
-				}
-			}
+			v_idxs.push_back(c_idx);
 		}
 	}
 	vector<thread> threads;
-	for (int i = 0; i < vv_idxs.size(); i++)
+	int st = 0;
+	int siz;
+	for (int i = 0; i < this->thread_cnt; i++) {
+		if (m) {
+			siz = t + 1;
+			m--;
+		}
+		else
+			siz = t;
 		threads.push_back(thread(&Terrain::chunksSetVerticesAndIndices,
-			this, vv_idxs[i]));
-	for (int i = 0; i < vv_idxs.size(); i++)
+			this, v_idxs, st, st + siz));
+		st = st + siz;
+	}
+	for (int i = 0; i < this->thread_cnt; i++)
 		threads[i].join();
 }
 
 void Terrain::setSightChunk(int cnt)
 {
-	this->sight_r = cnt % min(this->size_h, this->size_w);
+	int max_fov = min(this->size_h - 1, this->size_w - 1);
+	this->c_fov = min(max_fov, cnt);
 }
 
 int Terrain::getBlock(float x, float y, float z) const
@@ -452,19 +457,110 @@ WorldIndex Terrain::getBlockIndex(float x, float y, float z) const
 
 int Terrain::checkTerrainBoundary(float x, float z) const
 {
-	float r = 16.f * this->sight_r;
+	float r = 16.f * this->c_fov;
 	int mask = 0;
-	if (x - r < this->start_pos.x)
+	if (x - r < this->sv_pos.x) {
+		cout << "sv: " << this->sv_pos.x << ' ' << this->sv_pos.y;
+		cout << ", ev: " << this->ev_pos.x << ' ' << this->ev_pos.y << endl;
 		mask |= 1 << 0; // left out
-	if (x + r > this->end_pos.x)
+	}
+	if (x + r > this->ev_pos.x) {
+		cout << "sv: " << this->sv_pos.x << ' ' << this->sv_pos.y;
+		cout << ", ev: " << this->ev_pos.x << ' ' << this->ev_pos.y << endl;
 		mask |= 1 << 1; // right out
-	if (z + r > this->start_pos.y)
+	}
+	if (z + r > this->sv_pos.y)
 		mask |= 1 << 2; // back out
-	if (z - r < this->end_pos.y)
+	if (z - r < this->ev_pos.y)
 		mask |= 1 << 3; // front out
 	return mask;
 }
 
+void Terrain::userPositionCheck(float x, float z)
+{
+	int mask = this->checkTerrainBoundary(x, z);
+	vector<Index2> c_idxs;
+	Index2 cidx, cpos;
+	if (mask == 1) {
+		for (int i = 0; i < this->size_h; i++) {
+			if (i && i < this->size_w - 1) {
+				c_idxs.push_back(this->findChunkIndex(this->s_pos.x,
+					this->s_pos.y - 16 * i));
+			}
+			cpos = this->s_pos + Index2(-16, -16 * i);
+			cidx = this->getChunkIndex(cpos.x, cpos.y);
+			this->chunks[cidx.y][cidx.x]->chunk_pos = cpos;
+			this->chunks[cidx.y][cidx.x]->start_pos =
+				vec3(cpos.x + 0.5f, 0.5f, cpos.y - 0.5f);
+			this->chunks[cidx.y][cidx.x]->vertices_idx = 0;
+			this->chunks[cidx.y][cidx.x]->render_flag = false;
+			this->resetChunk(cidx);
+			this->fillChunk(cidx, cpos);
+			cidx = this->getChunkIndex(this->ev_pos.x - 16, cpos.y);
+			this->chunks[cidx.y][cidx.x]->render_flag = false;
+		}
+		this->sv_pos.x -= 16;
+		this->s_pos.x -= 16;
+		this->ev_pos.x -= 16;
+	}
+	else if (mask == 2) {
+		for (int i = 0; i < this->size_h; i++) {
+			if (i && i < this->size_w - 1) {
+				c_idxs.push_back(this->findChunkIndex(this->ev_pos.x,
+					this->s_pos.y - 16 * i));
+			}
+			cpos.x = this->ev_pos.x + 16;
+			cpos.y = this->s_pos.y - 16 * i;
+			cidx = this->getChunkIndex(cpos.x, cpos.y);
+			this->chunks[cidx.y][cidx.x]->chunk_pos = cpos;
+			this->chunks[cidx.y][cidx.x]->start_pos =
+				vec3(cpos.x + 0.5f, 0.5f, cpos.y - 0.5f);
+			this->chunks[cidx.y][cidx.x]->vertices_idx = 0;
+			this->chunks[cidx.y][cidx.x]->render_flag = false;
+			this->resetChunk(cidx);
+			this->fillChunk(cidx, cpos);
+		}
+		this->sv_pos.x += 16;
+		this->s_pos.x += 16;
+		this->ev_pos.x += 16;
+	}
+	else if (mask == 4) {
+
+	}
+	else if (mask == 8) {
+
+	}
+	else if (mask == 5) {
+
+	}
+	else if (mask == 9) {
+
+	}
+	else if (mask == 6) {
+
+	}
+	else if (mask == 10) {}
+	if (c_idxs.size()) {
+		vector<thread> threads;
+		int t = c_idxs.size() / this->thread_cnt;
+		int m = c_idxs.size() % this->thread_cnt;
+		int st = 0;
+		int siz;
+		for (int i = 0; i < this->thread_cnt; i++) {
+			if (m) {
+				siz = t + 1;
+				m--;
+			}
+			else
+				siz = t;
+			threads.push_back(thread(&Terrain::chunksSetVerticesAndIndices,
+				this, c_idxs, st, st + siz));
+			st = st + siz;
+		}
+		for (int i = 0; i < this->thread_cnt; i++)
+			threads[i].join();
+	}
+}
 
 
 /*
@@ -472,6 +568,18 @@ int Terrain::checkTerrainBoundary(float x, float z) const
 */
 
 // helper
+
+void Terrain::resetChunk(Index2 const& c_idx)
+{
+	for (int y = 0; y < 256; y++) {
+		for (int z = 0; z < 16; z++) {
+			for (int x = 0; x < 16; x++)
+				this->addBlock(c_idx, x, y, z, 0);
+		}
+	}
+}
+
+
 int Terrain::findBlock(Index2 const& c_idx, int x, int y, int z) const
 {
 	int idx = 16 * 16 * 256 * (c_idx.x + this->size_w * c_idx.y) +
