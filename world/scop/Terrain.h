@@ -20,9 +20,11 @@ public:
 	void setSightChunk(int cnt);
 	int getBlock(float x, float y, float z) const;
 	void userPositionCheck(float x, float z);
+
 public: // test func & temp func
 	void Render(Mat const& proj, Mat const& view, vec3 const& pos);
 	void setRender();
+	void showChunk(Index2 const& c_idx);
 
 private:
 	void resetChunk(Index2 const& c_idx);
@@ -71,6 +73,9 @@ private:
 	int size_w;
 	int size_h;
 	int c_fov;
+
+private:
+	bool test_flag = false;
 
 private:
 	size_t b_arr_size;
