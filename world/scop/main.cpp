@@ -16,6 +16,7 @@ HWND hWnd;
 
 // test 용 전역변수
 TestCam cam(800, 650);
+vec3 dir;
 long w_width = 800;
 long w_height = 650;
 bool lb_flag = false;
@@ -50,10 +51,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // test code
     Terrain terrain(10, 10, hWnd, w_width, w_height, 1, 8); // 짝수 단위로만
-    float h = terrain.getHeight(0, 0) + 0.5;
+    float h = terrain.getHeight(0.5, 0.5) + 0.5;
     cout << "h: " << h << endl;
     cam.movePos(0.5, h, 0.5f);
     cam.setDir(vec3(0, 0, 1.f));
+
     //cam.setDir(vec3(0, 0, 1));
     //cam.movePos(0, 15, -25);
     terrain.setSightChunk(1);
@@ -63,6 +65,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg = {};
 
     // 기본 메시지 루프입니다:
+    cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
     while (msg.message != WM_QUIT)
     {
         if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -76,11 +79,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else
         {
             if (lb_flag) {
-                terrain.selectBlockTest(cam.getPos(), cam.getDir());
+                terrain.selectBlockTest(cam.getPos(), dir);
                 lb_flag = false;
             }
             cam.update();
-            cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
+            //cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
             terrain.userPositionCheck(cam.getPos().x,
                 cam.getPos().z);
             terrain.Render(
@@ -205,11 +208,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
         {
             lb_flag = true;
+            Mat proj = cam.getViewProj().proj;
+            Mat view = cam.getViewProj().view;
+            int mouse_x = LOWORD(lParam);
+            int mouse_y = HIWORD(lParam);
+            float x = mouse_x * 2.0f / w_width - 1.0f;
+            float y = -mouse_y * 2.0f / w_height + 1.0f;
+            if (x < -1.f)
+                x = -1.f;
+            if (x > 1.f)
+                x = 1.f;
+            if (y < -1.f)
+                y = -1.f;
+            if (y > 1.f)
+                y = 1.f;
+            vec4 pos = vec4(x, y, 0, 1) * 0.01;
+            Mat r_mat = proj.Invert() * view.Invert();
+            pos = vec4::Transform(pos, r_mat);
+            dir = vec3(pos.x, pos.y, pos.z) - cam.getPos();
+            dir = XMVector3Normalize(dir);
+            //float t = dir.Cross(vec3(0, 1, 0)).Length();
+            /*if (t < 0.0000001 && t > -0.0000001) {
+                if (dir.y > 0)
+                    dir = XMVector3Normalize(vec3(0, 1, 0.001));
+                else
+                    dir = XMVector3Normalize(vec3(0, -1, 0.001));
+            }*/
+            vec3 cam_pos = cam.getPos();
+            cout << "c pos: " << cam_pos.x << ' ' << cam_pos.y;
+            cout << ' ' << cam_pos.z << endl;
+            /*vec4 dd = vec4::Transform(vec4(0, 0, 1, 0), view.Invert());
+            dir = vec3(dd.x, dd.y, dd.z);*/
         }
         break;
     case WM_MOUSEMOVE:
         {
-            cam.onMouseMove(wParam, LOWORD(lParam), HIWORD(lParam));
+            //cam.onMouseMove(wParam, LOWORD(lParam), HIWORD(lParam));
         }
         break;
     case WM_DESTROY:

@@ -6,6 +6,12 @@ TestCam::TestCam(int width, int height)
 {
 	this->w_width = width;
 	this->w_height = height;
+	this->mvp.proj = XMMatrixPerspectiveFovLH(
+		XMConvertToDegrees(70),
+		800.f / 650.f,
+		0.01f,
+		1000.f
+	);
 }
 
 TestCam::~TestCam()
@@ -60,6 +66,7 @@ void TestCam::setCursorInClient(HWND hwnd, int c_x, int c_y)
 void TestCam::update()
 {
 	vec3 right_dir = vec3(0, 1, 0).Cross(this->dir);
+	vec3 up_dir = this->dir.Cross(right_dir);
 	vec3 move_dir = vec3(0, 0, 0);
 	if (GetAsyncKeyState('A') & 0x8000)
 		move_dir -= right_dir;
@@ -69,15 +76,13 @@ void TestCam::update()
 		move_dir += this->dir;
 	if (GetAsyncKeyState('S') & 0x8000)
 		move_dir -= this->dir;
-	move_dir = XMVector3Normalize(move_dir) * 0.3f;
+	if (GetAsyncKeyState('Q') & 0x8000)
+		move_dir += up_dir;
+	if (GetAsyncKeyState('E') & 0x8000)
+		move_dir -= up_dir;
+	move_dir = XMVector3Normalize(move_dir) * 0.03f;
 	this->pos += move_dir;
 	this->mvp.view = XMMatrixLookToLH(this->pos, this->dir, vec3(0, 1, 0));
-	this->mvp.proj = XMMatrixPerspectiveFovLH(
-		XMConvertToDegrees(70),
-		800.f / 650.f,
-		0.01f,
-		1000.f
-	);
 }
 
 MVP TestCam::getViewProj()

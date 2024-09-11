@@ -27,6 +27,9 @@ public: // test func & temp func
 	void showChunk(Index2 const& c_idx);
 	void selectBlockTest(vec3 const& ray_pos, vec3 const& ray_dir);
 
+private: //test
+	vec3 getBlockIdxToWorld(Index2& c_idx, int x, int y, int z);
+
 private:
 	void resetChunk(Index2 const& c_idx);
 	void chunksSetVerticesAndIndices(
@@ -51,6 +54,11 @@ private:
 
 private: // find or add info
 	WorldIndex pickBlock(vec3 const& r_pos, vec3 const& r_dir);
+	WorldIndex getBlockIndexRay(
+		vec3 const& pos, 
+		vec3 const& r_pos,
+		int dir // 0: yz plane, 1 xy plane, 2 xz plane
+	);
 	WorldIndex getBlockIndex(float x, float y, float z) const;
 	int findBlock(Index2 const& c_idx, int x, int y, int z) const;
 	int findBlock(Index2 const& c_idx, Index3 const& b_idx) const;
