@@ -20,6 +20,20 @@
 
 #define STDZERO 0.00000001
 
+vec3 intersectionRayAndPlane(
+	vec3 const& r_pos,
+	vec3 const& r_dir,
+	vec3 const& p_pos,
+	vec3 const& p_dir
+)
+{
+	vec3 res;
+	float t;
+	t = (p_pos.Dot(p_dir) - r_pos.Dot(p_dir)) / p_dir.Dot(r_dir);
+	res = r_pos + t * r_dir;
+	return res;
+}
+
 Terrain::Terrain(
 	int size_w,
 	int size_h,
@@ -256,7 +270,7 @@ void Terrain::showChunk(Index2 const& c_idx)
 	}
 }
 
-void Terrain::selectBlockTest(vec3 const& ray_pos, vec3 const& ray_dir)
+void Terrain::selectBlockTest(vec3 ray_pos, vec3 ray_dir)
 {
 	WorldIndex block = this->pickBlock(ray_pos, ray_dir);
 	if (block.flag == true) {
@@ -462,20 +476,6 @@ void Terrain::setSightChunk(int cnt)
 	this->c_fov = min(max_fov, cnt);
 }
 
-vec3 intersectionRayAndPlane(
-	vec3 const& r_pos,
-	vec3 const& r_dir,
-	vec3 const& p_pos,
-	vec3 const& p_dir
-)
-{
-	vec3 res;
-	float t;
-	t = (p_pos.Dot(p_dir) - r_pos.Dot(p_dir)) / p_dir.Dot(r_dir);
-	res = r_pos + t * r_dir;
-	return res;
-}
-
 WorldIndex Terrain::getBlockIndexRay(
 	vec3 const& pos, 
 	vec3 const& r_pos,
@@ -495,7 +495,7 @@ WorldIndex Terrain::getBlockIndexRay(
 	return this->getBlockIndex(b_pos.x, b_pos.y, b_pos.z);
 }
 
-WorldIndex Terrain::pickBlock(vec3 const& r_pos, vec3 const& r_dir)
+WorldIndex Terrain::pickBlock(vec3 r_pos, vec3 r_dir)
 {
 	// 1. x y z index 찾기
 	WorldIndex ans;
@@ -514,7 +514,7 @@ WorldIndex Terrain::pickBlock(vec3 const& r_pos, vec3 const& r_dir)
 	else if (r_pos.y < 0) {
 		if (r_dir.y <= 0)
 			return ans;
-		vec3 tmp = intersectionRayAndPlane(
+		tmp = intersectionRayAndPlane(
 			r_pos,
 			r_dir,
 			vec3(r_pos.x, 0, r_pos.z),
@@ -615,29 +615,36 @@ WorldIndex Terrain::pickBlock(vec3 const& r_pos, vec3 const& r_dir)
 	if (flag_z == false)
 		max_z = INT_MAX;
 
-	for (int i = 0; i < 16; i++) {
+	int cnt_x = 0;
+	int cnt_y = 0;
+	int cnt_z = 0;
+	while (cnt_x < 10 || cnt_y < 10 || cnt_z < 10) {
 		if (max_x < max_y) {
 			if (max_x < max_z) {
 				x += step_x;
 				max_x += delta_x;
+				cnt_x++;
 			}
 			else {
 				z += step_z;
 				max_z += delta_z;
+				cnt_z++;
 			}
 		}
 		else {
 			if (max_y < max_z) {
 				y += step_y;
 				max_y += delta_y;
+				cnt_y++;
 			}
 			else {
 				z += step_z;
 				max_z += delta_z;
+				cnt_z++;
 			}
 		}
 		ans = this->getBlockIndex(x, y, z);
-		if (ans.flag = true) {
+		if (ans.flag && this->findBlock(ans.c_idx, ans.b_idx)) {
 			if (this->findBlock(ans.c_idx, ans.b_idx)) {
 				vec3 bp = this->getBlockIdxToWorld(
 					ans.c_idx,
@@ -645,8 +652,12 @@ WorldIndex Terrain::pickBlock(vec3 const& r_pos, vec3 const& r_dir)
 					ans.b_idx.y,
 					ans.b_idx.z
 				);
+				cout << "find x y z: " << x << ' ' << y << ' ' << z 
+					<< endl;
+				cout << "block type: " <<
+					this->findBlock(ans.c_idx, ans.b_idx) << endl;
 				cout << "select b pos: " << bp.x << ' ' << bp.y <<
-					' ' << bp.z << endl;
+					' ' << bp.z << endl << endl;
 				return ans;
 			}
 		}

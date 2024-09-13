@@ -7,6 +7,13 @@
 
 class Chunk;
 
+// test
+vec3 intersectionRayAndPlane(
+	vec3 const& r_pos,
+	vec3 const& r_dir,
+	vec3 const& p_pos,
+	vec3 const& p_dir
+);
 
 class Terrain
 {
@@ -25,7 +32,7 @@ public: // test func & temp func
 	void Render(Mat const& proj, Mat const& view, vec3 const& pos);
 	void setRender();
 	void showChunk(Index2 const& c_idx);
-	void selectBlockTest(vec3 const& ray_pos, vec3 const& ray_dir);
+	void selectBlockTest(vec3 ray_pos, vec3 ray_dir);
 
 private: //test
 	vec3 getBlockIdxToWorld(Index2& c_idx, int x, int y, int z);
@@ -53,7 +60,7 @@ private:
 	);
 
 private: // find or add info
-	WorldIndex pickBlock(vec3 const& r_pos, vec3 const& r_dir);
+	WorldIndex pickBlock(vec3 r_pos, vec3 r_dir);
 	WorldIndex getBlockIndexRay(
 		vec3 const& pos, 
 		vec3 const& r_pos,

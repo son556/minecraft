@@ -15,11 +15,15 @@
 HWND hWnd;
 
 // test 용 전역변수
-TestCam cam(800, 650);
+TestCam cam(800, 650, 60, 0.1, 1000);
 vec3 dir;
-long w_width = 800;
-long w_height = 650;
+int w_width = 800;
+int w_height = 650;
 bool lb_flag = false;
+bool fix_flag = true;
+bool move_flag = true;
+int mouse_x;
+int mouse_y;
 // test
 
 // 전역 변수:
@@ -54,7 +58,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     float h = terrain.getHeight(0.5, 0.5) + 0.5;
     cout << "h: " << h << endl;
     cam.movePos(0.5, h, 0.5f);
-    cam.setDir(vec3(0, 0, 1.f));
+    cam.setDir(vec3(0, 0, 1));
 
     //cam.setDir(vec3(0, 0, 1));
     //cam.movePos(0, 15, -25);
@@ -79,11 +83,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else
         {
             if (lb_flag) {
-                terrain.selectBlockTest(cam.getPos(), dir);
+                terrain.selectBlockTest(cam.getPos(), 
+                    cam.getDir());
                 lb_flag = false;
             }
             cam.update();
-            //cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
             terrain.userPositionCheck(cam.getPos().x,
                 cam.getPos().z);
             terrain.Render(
@@ -203,6 +207,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 // ESC 키가 눌렸을 때 프로그램 종료
                 DestroyWindow(hWnd);
             }
+            if (wParam == 13) {
+                fix_flag ^= 1;
+                cam.setDir(vec3(0, 0, 1));
+            }
         }
         break;
     case WM_LBUTTONDOWN:
@@ -222,28 +230,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 y = -1.f;
             if (y > 1.f)
                 y = 1.f;
-            vec4 pos = vec4(x, y, 0, 1) * 0.01;
-            Mat r_mat = proj.Invert() * view.Invert();
+            vec4 pos = vec4(x, y, 0, 1) * cam.getNear();
+            vec4 ppos = vec4(x, y, 1, 1) * cam.getFar();
+            Mat r_mat = (view * proj).Invert();
             pos = vec4::Transform(pos, r_mat);
-            dir = vec3(pos.x, pos.y, pos.z) - cam.getPos();
-            dir = XMVector3Normalize(dir);
-            //float t = dir.Cross(vec3(0, 1, 0)).Length();
-            /*if (t < 0.0000001 && t > -0.0000001) {
-                if (dir.y > 0)
-                    dir = XMVector3Normalize(vec3(0, 1, 0.001));
-                else
-                    dir = XMVector3Normalize(vec3(0, -1, 0.001));
-            }*/
+            ppos = vec4::Transform(ppos, r_mat);
+            vec4 tmp = ppos - pos;
+            //vec3 tmp_pos = vec3(x, y, 0);
+            //tmp_pos = vec3::Transform(tmp_pos, r_mat);
+            vec3 near_p = vec3(x, y, 0);
+            vec3 far_p = vec3(x, y, 1);
+            near_p = vec3::Transform(near_p, r_mat);
+            far_p = vec3::Transform(far_p, r_mat);
+            dir = vec3(tmp.x, tmp.y, tmp.z);
+            dir = far_p - near_p;
+            dir.Normalize();
             vec3 cam_pos = cam.getPos();
-            cout << "c pos: " << cam_pos.x << ' ' << cam_pos.y;
+            cout << "cam pos: " << cam_pos.x << ' ' << cam_pos.y;
             cout << ' ' << cam_pos.z << endl;
-            /*vec4 dd = vec4::Transform(vec4(0, 0, 1, 0), view.Invert());
-            dir = vec3(dd.x, dd.y, dd.z);*/
+            cout << "dir: " << dir.x << ' ' << dir.y << ' ' << dir.z << endl;
+            vec3 test = intersectionRayAndPlane(
+                cam.getPos(),
+                dir,
+                vec3(0, 0, 1),
+                vec3(0, 0, -1)
+            );
+            cout << "crash point< x: " << test.x << ", y: " <<
+                test.y << ", z: " << test.z << " >" << endl;
         }
         break;
     case WM_MOUSEMOVE:
         {
-            //cam.onMouseMove(wParam, LOWORD(lParam), HIWORD(lParam));
+        if (fix_flag) {
+            cam.onMouseMove(wParam, LOWORD(lParam), HIWORD(lParam));
+            cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
+        }
         }
         break;
     case WM_DESTROY:
