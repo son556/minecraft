@@ -615,32 +615,25 @@ WorldIndex Terrain::pickBlock(vec3 r_pos, vec3 r_dir)
 	if (flag_z == false)
 		max_z = INT_MAX;
 
-	int cnt_x = 0;
-	int cnt_y = 0;
-	int cnt_z = 0;
-	while (cnt_x < 10 || cnt_y < 10 || cnt_z < 10) {
+	for (int i = 0; i < 8; i++) {
 		if (max_x < max_y) {
 			if (max_x < max_z) {
 				x += step_x;
 				max_x += delta_x;
-				cnt_x++;
 			}
 			else {
 				z += step_z;
 				max_z += delta_z;
-				cnt_z++;
 			}
 		}
 		else {
 			if (max_y < max_z) {
 				y += step_y;
 				max_y += delta_y;
-				cnt_y++;
 			}
 			else {
 				z += step_z;
 				max_z += delta_z;
-				cnt_z++;
 			}
 		}
 		ans = this->getBlockIndex(x, y, z);
@@ -652,12 +645,6 @@ WorldIndex Terrain::pickBlock(vec3 r_pos, vec3 r_dir)
 					ans.b_idx.y,
 					ans.b_idx.z
 				);
-				cout << "find x y z: " << x << ' ' << y << ' ' << z 
-					<< endl;
-				cout << "block type: " <<
-					this->findBlock(ans.c_idx, ans.b_idx) << endl;
-				cout << "select b pos: " << bp.x << ' ' << bp.y <<
-					' ' << bp.z << endl << endl;
 				return ans;
 			}
 		}

@@ -22,8 +22,7 @@ int w_height = 650;
 bool lb_flag = false;
 bool fix_flag = true;
 bool move_flag = true;
-int mouse_x;
-int mouse_y;
+bool move_check = false;
 // test
 
 // 전역 변수:
@@ -50,7 +49,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
-
+    RECT client_rect;
+    GetClientRect(hWnd, &client_rect);
+    cam.setWidth(client_rect.right - 1);
+    cam.setHeight(client_rect.bottom - 1);
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SCOP));
 
     // test code
@@ -69,7 +71,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg = {};
 
     // 기본 메시지 루프입니다:
-    cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
+    cam.setCursorInClient(hWnd);
+    move_check = true;
     while (msg.message != WM_QUIT)
     {
         if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -216,54 +219,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
         {
             lb_flag = true;
-            Mat proj = cam.getViewProj().proj;
-            Mat view = cam.getViewProj().view;
-            int mouse_x = LOWORD(lParam);
-            int mouse_y = HIWORD(lParam);
-            float x = mouse_x * 2.0f / w_width - 1.0f;
-            float y = -mouse_y * 2.0f / w_height + 1.0f;
-            if (x < -1.f)
-                x = -1.f;
-            if (x > 1.f)
-                x = 1.f;
-            if (y < -1.f)
-                y = -1.f;
-            if (y > 1.f)
-                y = 1.f;
-            vec4 pos = vec4(x, y, 0, 1) * cam.getNear();
-            vec4 ppos = vec4(x, y, 1, 1) * cam.getFar();
-            Mat r_mat = (view * proj).Invert();
-            pos = vec4::Transform(pos, r_mat);
-            ppos = vec4::Transform(ppos, r_mat);
-            vec4 tmp = ppos - pos;
-            //vec3 tmp_pos = vec3(x, y, 0);
-            //tmp_pos = vec3::Transform(tmp_pos, r_mat);
-            vec3 near_p = vec3(x, y, 0);
-            vec3 far_p = vec3(x, y, 1);
-            near_p = vec3::Transform(near_p, r_mat);
-            far_p = vec3::Transform(far_p, r_mat);
-            dir = vec3(tmp.x, tmp.y, tmp.z);
-            dir = far_p - near_p;
-            dir.Normalize();
+            dir = cam.getDir();
+            SimpleMath::Ray ray(cam.getPos(), dir);
+            SimpleMath::Plane plane(vec3(0, 0, 1), vec3(0, 0, 1));
+            float dist;
+            ray.Intersects(plane, dist);
+            vec3 cp = ray.position + dist * ray.direction;
             vec3 cam_pos = cam.getPos();
-            cout << "cam pos: " << cam_pos.x << ' ' << cam_pos.y;
-            cout << ' ' << cam_pos.z << endl;
-            cout << "dir: " << dir.x << ' ' << dir.y << ' ' << dir.z << endl;
-            vec3 test = intersectionRayAndPlane(
-                cam.getPos(),
-                dir,
-                vec3(0, 0, 1),
-                vec3(0, 0, -1)
-            );
-            cout << "crash point< x: " << test.x << ", y: " <<
-                test.y << ", z: " << test.z << " >" << endl;
         }
         break;
     case WM_MOUSEMOVE:
         {
-        if (fix_flag) {
-            cam.onMouseMove(wParam, LOWORD(lParam), HIWORD(lParam));
-            cam.setCursorInClient(hWnd, w_width / 2, w_height / 2);
+        if (move_check && fix_flag) {
+            RECT client_rect;
+            GetClientRect(hWnd, &client_rect);
+            POINT pt;
+            GetCursorPos(&pt);
+            ScreenToClient(hWnd, &pt);
+            int centerX = (client_rect.right - client_rect.left) / 2;
+            int centerY = (client_rect.bottom - client_rect.top) / 2;
+            if (pt.x == centerX && pt.y == centerY)
+            {
+                return 0; // 움직임을 무시
+            }
+            cam.onMouseMove(hWnd, pt.x, pt.y);
+            cam.setCursorInClient(hWnd);
         }
         }
         break;
