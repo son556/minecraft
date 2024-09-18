@@ -60,6 +60,11 @@ ComPtr<ID3D11DeviceContext> Graphics::getContext() const
 	return this->context;
 }
 
+ComPtr<ID3D11RenderTargetView> Graphics::getRenderTargetVew() const
+{
+	return this->render_target_view;
+}
+
 void Graphics::createDeviceAndSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC desc;

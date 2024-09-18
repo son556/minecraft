@@ -1,5 +1,7 @@
 SamplerState sampler0 : register(s0);
+SamplerState sampler1 : register(s1);
 Texture2DArray texture_arr : register(t0);
+Texture2D depth_map : register(t1);
 
 struct PS_INPUT
 {
@@ -8,15 +10,13 @@ struct PS_INPUT
     float3 world_pos : POSITION;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
-    //int x_pos : XPOS;
+    float z : Z;
 };
 
 cbuffer eyePos : register(b0)
 {
     float3 pos;
-    float dummy;
     float r;
-    //float3 dummys;
 };
 
 float4 main(PS_INPUT input) : SV_TARGET
@@ -43,10 +43,10 @@ float4 main(PS_INPUT input) : SV_TARGET
         float lod = 5 * saturate((dist - distMin) / (distMax - distMin));
     
     
-        if (d <= r)
-            color = texture_arr.SampleLevel(sampler0, uvw, lod);
-        else
-            color = texture_arr.SampleLevel(sampler0, uvw, lod) * float4(0.6, 0.6, 0.6, 1.0);
+        float depth = depth_map.Sample(sampler1, input.uv).r;
+        color = texture_arr.SampleLevel(sampler0, uvw, lod);
+        if (depth != 0)
+            color *= float4(0.1, 0.1, 0.1, 1);
     }
     return color;
 }
