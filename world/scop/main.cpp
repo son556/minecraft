@@ -73,9 +73,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // 기본 메시지 루프입니다:
     Light light;
-    light.view = XMMatrixLookToLH(vec3(0, 100, 0), vec3(0, -1, 0),
-        vec3(0, 0, 1));
-    light.proj = XMMatrixOrthographicLH(800, 650, 0.1, 1000);
+    //light.view = XMMatrixLookToLH(vec3(0, 50, 0), vec3(0, -1, 0),
+        //vec3(0, 0, 1));
+    light.view = cam.getViewProj().view;
+    //light.proj = XMMatrixOrthographicLH(800, 650, 0.1, 1000);
+    light.proj = cam.getViewProj().proj;
     cam.setCursorInClient(hWnd);
     move_check = true;
     while (msg.message != WM_QUIT)
@@ -101,7 +103,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             cam.update();
             terrain.userPositionCheck(cam.getPos().x,
                 cam.getPos().z);
-            terrain.DepthRender(light.view, light.proj);
+            terrain.DepthRender(
+                cam.getViewProj().view, 
+                cam.getViewProj().proj
+            );
             terrain.Render(
                 cam.getViewProj().view,
                 cam.getViewProj().proj,

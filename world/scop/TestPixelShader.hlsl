@@ -10,7 +10,7 @@ struct PS_INPUT
     float3 world_pos : POSITION;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
-    float z : Z;
+    float3 lpos : L_POSITION;
 };
 
 cbuffer eyePos : register(b0)
@@ -25,28 +25,26 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 uvw;
     float offset = (input.type - 1) * 3;
     
-    if (input.type == 2)
-        color = float4(1, 0, 0, 1);
+    if (input.dir == 0 || input.dir == 1)
+        uvw = float3(input.uv, input.dir + offset);
     else
-    {
-        if (input.dir == 0 || input.dir == 1)
-            uvw = float3(input.uv, input.dir + offset);
-        else
             uvw = float3(input.uv, 2 + offset);
 
-        float2 dvec = float2(input.world_pos.x - pos.x,
+    float2 dvec = float2(input.world_pos.x - pos.x, 
         input.world_pos.z - pos.z);
-        float d = sqrt(pow(dvec.x, 2) + pow(dvec.y, 2));
-        float dist = pos.y - input.world_pos.y;
-        float distMin = 10.0;
-        float distMax = 50.0;
-        float lod = 5 * saturate((dist - distMin) / (distMax - distMin));
+    float d = sqrt(pow(dvec.x, 2) + pow(dvec.y, 2));
+    float dist = pos.y - input.world_pos.y;
+    float distMin = 10.0;
+    float distMax = 50.0;
+    float lod = 5 * saturate((dist - distMin) / (distMax - distMin));
     
     
-        float depth = depth_map.Sample(sampler1, input.uv).r;
-        color = texture_arr.SampleLevel(sampler0, uvw, lod);
-        if (depth != 0)
-            color *= float4(0.1, 0.1, 0.1, 1);
-    }
+    input.lpos.y *= -1;
+    input.lpos.xy = (input.lpos.xy + 1.0) * 0.5;
+    float depth = depth_map.Sample(sampler1, input.lpos.xy).r;
+    depth = depth_map.Sample(sampler1, float2(0.5, 0.5)).r;
+    color = texture_arr.SampleLevel(sampler0, uvw, lod);
+    if (depth)
+        return float4(0, 0, 0, 1);
     return color;
 }

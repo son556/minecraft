@@ -27,7 +27,7 @@ struct PS_INPUT
     float3 world_pos : POSITION;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
-    float z : Z;
+    float3 lpos : L_POSITION;
 };
 
 PS_INPUT main(VS_INPUT input)
@@ -49,6 +49,6 @@ PS_INPUT main(VS_INPUT input)
     float4 tmp = float4(input.pos, 1);
     tmp = mul(tmp, l_view);
     tmp = mul(tmp, l_proj);
-    output.z = tmp.z / tmp.w;
+    output.lpos = tmp.xyz / tmp.w;
     return output;
 }

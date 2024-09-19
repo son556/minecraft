@@ -241,17 +241,18 @@ void Terrain::setRender()
 		"main",
 		"ps_5_0"
 	);
-	D3D11_SAMPLER_DESC s_desc;
-	ZeroMemory(&s_desc, sizeof(s_desc));
-	s_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	s_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	s_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	s_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	s_desc.MinLOD = 0;
-	s_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	D3D11_SAMPLER_DESC comparisonSamplerDesc;
+	ZeroMemory(&comparisonSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	comparisonSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	comparisonSamplerDesc.MinLOD = 0;
+	comparisonSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	this->depth_sampler_state = make_shared<SamplerState>(
 		this->graphic->getDevice(),
-		s_desc
+		comparisonSamplerDesc
 	);
 }
 
@@ -268,6 +269,9 @@ void Terrain::setRenderPipeLine(int flag)
 			this->vertex_shader->getComPtr().Get(),
 			nullptr,
 			0
+		);
+		this->graphic->getContext()->RSSetState(
+			this->rasterizer_state->getComPtr().Get()
 		);
 		this->graphic->getContext()->PSSetShader(
 			this->pixel_shader->getComPtr().Get(),
@@ -311,6 +315,9 @@ void Terrain::setRenderPipeLine(int flag)
 			nullptr,
 			0
 		);
+		this->graphic->getContext()->RSSetState(
+			this->rasterizer_state->getComPtr().Get()
+		);
 		this->graphic->getContext()->PSSetShader(
 			this->depth_pixel_shader->getComPtr().Get(),
 			nullptr,
@@ -344,17 +351,25 @@ void Terrain::DepthRender(
 		vertex_cbuffer.getComPtr().GetAddressOf()
 	);
 	this->graphic->getContext()->OMSetRenderTargets(
-		0,
-		NULL,
+		1,
+		this->graphic->getRenderTargetVew().GetAddressOf(),
 		depth_map->getDepthStencilView().Get()
 	);
 	// test
-	/*float arr[4] = { 0, 0, 0, 1 };
+	float arr[4] = { 0, 0, 0, 1 };
 	this->graphic->getContext()->ClearRenderTargetView(
 		this->graphic->getRenderTargetVew().Get(),
 		arr
-	);*/
-	D3D11_VIEWPORT view_port = this->depth_map->getViewPort();
+	);
+	// test
+	D3D11_VIEWPORT view_port;
+	ZeroMemory(&view_port, sizeof(view_port));
+	view_port.TopLeftX = 0.0f;
+	view_port.TopLeftY = 0.0f;
+	view_port.Width = static_cast<float>(this->window_w);
+	view_port.Height = static_cast<float>(this->window_h);
+	view_port.MinDepth = 0.0f;
+	view_port.MaxDepth = 1.0f;
 	this->graphic->getContext()->RSSetViewports(1, &(view_port));
 	// test end
 

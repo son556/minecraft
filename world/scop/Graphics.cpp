@@ -30,7 +30,7 @@ void Graphics::renderBegin()
 	);
 	this->context->ClearDepthStencilView(
 		this->depth_stencil_view.Get(),
-		D3D11_CLEAR_DEPTH,
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.f,
 		0
 	);

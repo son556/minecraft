@@ -16,7 +16,6 @@ DepthMap::DepthMap(ComPtr<ID3D11Device> const& device,
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 	desc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -32,6 +31,7 @@ DepthMap::DepthMap(ComPtr<ID3D11Device> const& device,
 	ZeroMemory(&dsv_desc, sizeof(dsv_desc));
 	dsv_desc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsv_desc.Texture2D.MipSlice = 0;
 	hr = device->CreateDepthStencilView(this->depth_texture.Get(), 
 		&dsv_desc, this->depth_stencil_view.GetAddressOf());
 	CHECK(hr);
@@ -44,8 +44,6 @@ DepthMap::DepthMap(ComPtr<ID3D11Device> const& device,
 	hr = device->CreateShaderResourceView(this->depth_texture.Get(),
 		&srv_desc, this->depth_SRV.GetAddressOf());
 	CHECK(hr);
-
-	this->setViewPort();
 }
 
 ComPtr<ID3D11DepthStencilView> DepthMap::getDepthStencilView()
