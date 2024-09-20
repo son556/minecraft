@@ -243,10 +243,11 @@ void Terrain::setRender()
 	);
 	D3D11_SAMPLER_DESC comparisonSamplerDesc;
 	ZeroMemory(&comparisonSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	comparisonSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.BorderColor[0] = 100.f;
 	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	comparisonSamplerDesc.MinLOD = 0;
 	comparisonSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -404,6 +405,7 @@ void Terrain::Render
 	Mat const& light_proj
 )
 {
+	this->graphic->renderBegin();
 	this->setRenderPipeLine(0);
 	CamPos cam;
 	cam.pos = cam_pos;
@@ -448,7 +450,6 @@ void Terrain::Render
 		pixel_cbuffer->getComPtr().GetAddressOf()
 	);
 	this->graphic->setClearColor(0.3, 0.3, 0.3, 1);
-	this->graphic->renderBegin();
 	for (int i = 0; i < this->size_h; i++) {
 		for (int j = 0; j < this->size_w; j++) {
 			if (this->chunks[i][j]->render_flag == false) {

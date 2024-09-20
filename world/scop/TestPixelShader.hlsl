@@ -10,7 +10,7 @@ struct PS_INPUT
     float3 world_pos : POSITION;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
-    float3 lpos : L_POSITION;
+    float3 l_pos : L_POSITION;
 };
 
 cbuffer eyePos : register(b0)
@@ -39,12 +39,11 @@ float4 main(PS_INPUT input) : SV_TARGET
     float lod = 5 * saturate((dist - distMin) / (distMax - distMin));
     
     
-    input.lpos.y *= -1;
-    input.lpos.xy = (input.lpos.xy + 1.0) * 0.5;
-    float depth = depth_map.Sample(sampler1, input.lpos.xy).r;
-    depth = depth_map.Sample(sampler1, float2(0.5, 0.5)).r;
+    input.l_pos.y *= -1;
+    input.l_pos.xy = (input.l_pos.xy + 1) * 0.5;
+    float depth = depth_map.Sample(sampler1, input.l_pos.xy).r;
     color = texture_arr.SampleLevel(sampler0, uvw, lod);
-    if (depth)
+    if (depth + 0.001 < input.l_pos.z)
         return float4(0, 0, 0, 1);
     return color;
 }

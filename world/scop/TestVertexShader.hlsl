@@ -27,7 +27,7 @@ struct PS_INPUT
     float3 world_pos : POSITION;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
-    float3 lpos : L_POSITION;
+    float3 l_pos : L_POSITION;
 };
 
 PS_INPUT main(VS_INPUT input)
@@ -46,9 +46,10 @@ PS_INPUT main(VS_INPUT input)
     output.pos = mul(output.pos, proj);
     
     // shadow 용
-    float4 tmp = float4(input.pos, 1);
-    tmp = mul(tmp, l_view);
-    tmp = mul(tmp, l_proj);
-    output.lpos = tmp.xyz / tmp.w;
+    float4 lpos = float4(input.pos, 1);
+    lpos = mul(lpos, l_view);
+    lpos = mul(lpos, l_proj);
+    lpos.xyz /= lpos.w;
+    output.l_pos = lpos.xyz;
     return output;
 }
