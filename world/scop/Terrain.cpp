@@ -166,6 +166,11 @@ void Terrain::setRender()
 		D3D11_FILL_SOLID,
 		D3D11_CULL_BACK
 	);
+	this->depth_rasterizer_state = make_shared<RasterizerState>(
+		this->graphic->getDevice(),
+		D3D11_FILL_SOLID,
+		D3D11_CULL_FRONT
+	);
 	this->sampler_state = make_shared<SamplerState>(this->graphic->getDevice());
 	vector<D3D11_INPUT_ELEMENT_DESC> layout = {
 		{
@@ -187,11 +192,20 @@ void Terrain::setRender()
 			0
 		},
 		{
+			"NORMAL",
+			0,
+			DXGI_FORMAT_R32G32B32_FLOAT,
+			0,
+			16,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0
+		},
+		{
 			"TEXCOORD",
 			0,
 			DXGI_FORMAT_R32G32_FLOAT,
 			0,
-			16,
+			28,
 			D3D11_INPUT_PER_VERTEX_DATA,
 			0
 		},
@@ -200,7 +214,7 @@ void Terrain::setRender()
 			0,
 			DXGI_FORMAT_R32_SINT,
 			0,
-			24,
+			36,
 			D3D11_INPUT_PER_VERTEX_DATA,
 			0
 		},
@@ -244,11 +258,14 @@ void Terrain::setRender()
 	D3D11_SAMPLER_DESC comparisonSamplerDesc;
 	ZeroMemory(&comparisonSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
 	comparisonSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	comparisonSamplerDesc.BorderColor[0] = 100.f;
-	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	comparisonSamplerDesc.BorderColor[0] = 0.f;
+	comparisonSamplerDesc.BorderColor[1] = 0.f;
+	comparisonSamplerDesc.BorderColor[2] = 0.f;
+	comparisonSamplerDesc.BorderColor[3] = 0.f;
+	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	comparisonSamplerDesc.MinLOD = 0;
 	comparisonSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	this->depth_sampler_state = make_shared<SamplerState>(
@@ -317,7 +334,7 @@ void Terrain::setRenderPipeLine(int flag)
 			0
 		);
 		this->graphic->getContext()->RSSetState(
-			this->rasterizer_state->getComPtr().Get()
+			this->depth_rasterizer_state->getComPtr().Get()
 		);
 		this->graphic->getContext()->PSSetShader(
 			this->depth_pixel_shader->getComPtr().Get(),
@@ -352,27 +369,24 @@ void Terrain::DepthRender(
 		vertex_cbuffer.getComPtr().GetAddressOf()
 	);
 	this->graphic->getContext()->OMSetRenderTargets(
-		1,
-		this->graphic->getRenderTargetVew().GetAddressOf(),
+		0,
+		NULL,
 		depth_map->getDepthStencilView().Get()
 	);
-	// test
-	float arr[4] = { 0, 0, 0, 1 };
-	this->graphic->getContext()->ClearRenderTargetView(
-		this->graphic->getRenderTargetVew().Get(),
-		arr
-	);
-	// test
 	D3D11_VIEWPORT view_port;
 	ZeroMemory(&view_port, sizeof(view_port));
 	view_port.TopLeftX = 0.0f;
 	view_port.TopLeftY = 0.0f;
-	view_port.Width = static_cast<float>(this->window_w);
-	view_port.Height = static_cast<float>(this->window_h);
+	//view_port.Width = static_cast<float>(this->window_w);
+	//view_port.Height = static_cast<float>(this->window_h);
+	
+	int times = 12;
+	view_port.Width = pow(2, times);
+	view_port.Height = pow(2, times);
+	
 	view_port.MinDepth = 0.0f;
 	view_port.MaxDepth = 1.0f;
 	this->graphic->getContext()->RSSetViewports(1, &(view_port));
-	// test end
 
 	this->graphic->getContext()->ClearDepthStencilView(
 		depth_map->getDepthStencilView().Get(),
@@ -391,9 +405,6 @@ void Terrain::DepthRender(
 			);
 		}
 	}
-
-	//test
-	//this->graphic->renderEnd();
 }
 
 void Terrain::Render
@@ -418,36 +429,32 @@ void Terrain::Render
 		this->graphic->getContext(),
 		mvp
 	);
-	MVP l_mvp;
-	l_mvp.view = light_view.Transpose();
-	l_mvp.proj = light_proj.Transpose();
-	ConstantBuffer vertex_cbuffer_light(
-		this->graphic->getDevice(),
-		this->graphic->getContext(),
-		l_mvp
-	);
 	this->graphic->getContext()->VSSetConstantBuffers(
 		0,
 		1,
 		vertex_cbuffer.getComPtr().GetAddressOf()
 	);
-	this->graphic->getContext()->VSSetConstantBuffers(
-		1,
-		1,
-		vertex_cbuffer_light.getComPtr().GetAddressOf()
-	);
-
-	shared_ptr<ConstantBuffer> pixel_cbuffer;
-	pixel_cbuffer = make_shared<ConstantBuffer>(
+	ConstantBuffer pixel_cbuffer(
 		this->graphic->getDevice(),
 		this->graphic->getContext(),
 		cam
 	);
-	pixel_cbuffer->update(cam);
+	mvp.view = light_view.Transpose();
+	mvp.proj = light_proj.Transpose();
+	ConstantBuffer light_matrix_cbuffer(
+		this->graphic->getDevice(),
+		this->graphic->getContext(),
+		mvp
+	);
 	this->graphic->getContext()->PSSetConstantBuffers(
 		0,
 		1,
-		pixel_cbuffer->getComPtr().GetAddressOf()
+		pixel_cbuffer.getComPtr().GetAddressOf()
+	);
+	this->graphic->getContext()->PSSetConstantBuffers(
+		1,
+		1,
+		light_matrix_cbuffer.getComPtr().GetAddressOf()
 	);
 	this->graphic->setClearColor(0.3, 0.3, 0.3, 1);
 	for (int i = 0; i < this->size_h; i++) {
@@ -504,28 +511,71 @@ void Terrain::putBlock(
 		Index2& cidx = widx.c_idx;
 		Index3& bidx = widx.b_idx;
 		vec3 const& pos = widx.pos;
+		int dir_flag = -1;
 		if (widx.dir == 0) {
-			if (ray_pos.y > pos.y && pos.y + 1 < 256)
+			if (ray_pos.y > pos.y && pos.y + 1 < 256) {
 				add_idx = this->getBlockIndex(pos.x, pos.y + 1, pos.z);
-			else if (ray_pos.y < pos.y && pos.y - 1 > -1)
+				dir_flag = 0;
+			}
+			else if (ray_pos.y < pos.y && pos.y - 1 > -1) {
 				add_idx = this->getBlockIndex(pos.x, pos.y - 1, pos.z);
+				dir_flag = 1;
+			}
 		}
 		else if (widx.dir == 1) {
-			if (ray_pos.z > pos.z)
-				add_idx = this->getBlockIndex(pos.x, pos.y, pos.z + 1);
-			else
+			if (ray_pos.z < pos.z) {
 				add_idx = this->getBlockIndex(pos.x, pos.y, pos.z - 1);
+				dir_flag = 2;
+			}
+			else {
+				add_idx = this->getBlockIndex(pos.x, pos.y, pos.z + 1);
+				dir_flag = 3;
+			}
 		}
 		else {
-			if (ray_pos.x > pos.x)
-				add_idx = this->getBlockIndex(pos.x + 1, pos.y, pos.z);
-			else
+			if (ray_pos.x < pos.x) {
 				add_idx = this->getBlockIndex(pos.x - 1, pos.y, pos.z);
+				dir_flag = 4;
+			}
+			else {
+				add_idx = this->getBlockIndex(pos.x + 1, pos.y, pos.z);
+				dir_flag = 5;
+			}
 		}
 		if (add_idx.flag) {
 			vector<Index2> v_idx;
 			cidx = add_idx.c_idx;
 			bidx = add_idx.b_idx;
+			Index2 adj_idx;
+			Index2 const& cpos = this->chunks[cidx.y][cidx.x]->chunk_pos;
+			if (bidx.x == 0) {
+				adj_idx = this->findChunkIndex(cpos.x - 16, cpos.y);
+				if (adj_idx.flag && this->findBlock(adj_idx, 15, bidx.y, bidx.z)) {
+					this->chunks[adj_idx.y][adj_idx.x]->vertices_idx = 0;
+					v_idx.push_back(adj_idx);
+				}
+			}
+			if (bidx.x == 15) {
+				adj_idx = this->findChunkIndex(cpos.x + 16, cpos.y);
+				if (adj_idx.flag && this->findBlock(adj_idx, 0, bidx.y, bidx.z)) {
+					this->chunks[adj_idx.y][adj_idx.x]->vertices_idx = 0;
+					v_idx.push_back(adj_idx);
+				}
+			}
+			if (bidx.z == 15) {
+				adj_idx = this->findChunkIndex(cpos.x, cpos.y - 16);
+				if (adj_idx.flag && this->findBlock(adj_idx, bidx.x, bidx.y, 0)) {
+					this->chunks[adj_idx.y][adj_idx.x]->vertices_idx = 0;
+					v_idx.push_back(adj_idx);
+				}
+			}
+			if (bidx.z == 0) {
+				adj_idx = this->findChunkIndex(cpos.x, cpos.y + 16);
+				if (adj_idx.flag && this->findBlock(adj_idx, bidx.x, bidx.y, 15)) {
+					this->chunks[adj_idx.y][adj_idx.x]->vertices_idx = 0;
+					v_idx.push_back(adj_idx);
+				}
+			}
 			this->addBlock(cidx, bidx, type);
 			this->chunks[cidx.y][cidx.x]->vertices_idx = 0;
 			int16& max_h = this->chunks[cidx.y][cidx.x]->max_h;
@@ -616,7 +666,7 @@ void Terrain::vertexAndIndexGenerator(
 				int type = this->findBlock(c_idx, x, y, z);
 				if (type == 0)
 					continue;
-				Index3 next(x + move.x, y + move.y, z + move.z);
+				Index3 next(x + move.x, y + move.y, z + move.z); // index
 				if (inChunkBoundary(next.x, next.y, next.z) && this->findBlock(c_idx, next))
 					continue;
 				if (adj_idx.flag) {
@@ -644,8 +694,8 @@ void Terrain::vertexAndIndexGenerator(
 }
 
 void Terrain::chunksSetVerticesAndIndices(
-	vector<Index2> const& v_idx, 
-	int st, 
+	vector<Index2> const& v_idx,
+	int st,
 	int ed
 )
 {

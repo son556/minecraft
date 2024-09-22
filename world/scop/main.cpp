@@ -60,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     Terrain terrain(10, 10, hWnd, w_width, w_height, 1, 8); // 짝수 단위로만
     float h = terrain.getHeight(0.5, 0.5) + 0.5;
     cout << "h: " << h << endl;
-    cam.movePos(0.5, h, 0.5f);
+    cam.movePos(0.5, h, 0.5);
     cam.setDir(vec3(0, 0, 1));
 
     //cam.setDir(vec3(0, 0, 1));
@@ -73,10 +73,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // 기본 메시지 루프입니다:
     Light light;
-    light.view = XMMatrixLookToLH(vec3(0, 260, 0), vec3(0, -1, 0),
+    light.view = XMMatrixLookToLH(vec3(0, 50, 0),
+        XMVector3Normalize(vec3(0, -1, 0)),
         vec3(0, 0, 1));
     //light.view = cam.getViewProj().view;
-    light.proj = XMMatrixOrthographicLH(800, 650, 0.01, 1000);
+    light.proj = XMMatrixOrthographicLH(100, 100, 0.1, 1000);
     //light.proj = cam.getViewProj().proj;
     cam.setCursorInClient(hWnd);
     move_check = true;

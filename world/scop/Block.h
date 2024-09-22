@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WorldUtils.h"
+
 namespace Block {
 
 	inline void addBlockFacePosAndTex(
@@ -82,19 +84,24 @@ namespace Block {
 			{0.f, 0.f},
 			{1.f, 0.f}
 		};
+		static vector<vec3> normals = {
+			{0, 1, 0},
+			{0, -1, 0},
+			{0, 0, -1},
+			{0, 0, 1},
+			{-1, 0, 0},
+			{1, 0, 0}
+		};
 		VertexBlockUV vertex;
 		x = start_pos.x + x;
 		y = start_pos.y + y;
 		z = start_pos.z - z;
 		for (int i = dir * 4; i < dir * 4 + 4; i++) {
 			vertex.pos = sample_pos[i] + vec3(x, y, z);
+			vertex.normal = normals[dir];
 			vertex.uv = sample_uv[i];
 			vertex.type = type;
 			vertex.dir = dir;
-
-			//vertex.x_pos = test_chunk_x_pos;
-			/*vertex.chunk_idx[0] = idx_i;
-			vertex.chunk_idx[1] = idx_j;*/
 			vertices.push_back(vertex);
 		}
 	}

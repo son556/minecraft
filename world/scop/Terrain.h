@@ -114,6 +114,7 @@ private:
 private:
 	shared_ptr<Graphics> graphic;
 	shared_ptr<RasterizerState> rasterizer_state;
+	shared_ptr<RasterizerState> depth_rasterizer_state;
 	vector <shared_ptr<BlendState>> blend_state_arr;
 	shared_ptr<TextureArray> texture_array;
 	shared_ptr<SamplerState> sampler_state;
