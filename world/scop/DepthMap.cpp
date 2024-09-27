@@ -1,15 +1,9 @@
 #include "pch.h"
 #include "DepthMap.h"
 
-DepthMap::DepthMap(ComPtr<ID3D11Device> const& device, 
-	UINT width, 
-	UINT height
-)
+DepthMap::DepthMap(ComPtr<ID3D11Device> const& device)
 {
-	this->width = width;
-	this->height = height;
-
-	int times = 12;
+	int times = 10;
 	this->width = pow(2, times);
 	this->height = pow(2, times);
 

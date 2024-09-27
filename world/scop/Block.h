@@ -11,8 +11,7 @@ namespace Block {
 		float y,
 		float z,
 		int type,
-		/*int idx_i,
-		int idx_j,*/
+		int shadow_flag,
 		vector<VertexBlockUV>& vertices
 	)
 	{
@@ -102,6 +101,7 @@ namespace Block {
 			vertex.uv = sample_uv[i];
 			vertex.type = type;
 			vertex.dir = dir;
+			vertex.shadow_flag = shadow_flag;
 			vertices.push_back(vertex);
 		}
 	}

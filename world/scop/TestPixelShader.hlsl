@@ -11,6 +11,7 @@ struct PS_INPUT
     float3 world_pos : POSITION;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
+    int shadow_flag : SHADOW;
 };
 
 cbuffer eyePos : register(b0)
@@ -44,21 +45,28 @@ float4 main(PS_INPUT input) : SV_TARGET
     float distMin = 10.0;
     float distMax = 50.0;
     float lod = 5 * saturate((dist - distMin) / (distMax - distMin));
+    color = texture_arr.SampleLevel(sampler0, uvw, lod);
     
+    /*
+    //shadow map
     float move = 0.1;
     input.world_pos += move * input.normal;
     float4 lpos = float4(input.world_pos, 1);
     lpos = mul(lpos, l_view);
     lpos = mul(lpos, l_proj);
-    lpos.xyz /= lpos.w;
     lpos.y *= -1;
     lpos.xy = (lpos.xy + 1) * 0.5;
     float depth = depth_map.Sample(sampler1, lpos.xy).r;
     float3 light_dir = float3(0, -1, 0);
     float bias = 0.005 * tan(acos(dot(input.normal, light_dir)));
-    bias = clamp(bias, 0, 0.01);
-    color = texture_arr.SampleLevel(sampler0, uvw, lod);
+    bias = clamp(bias, 0, 0.0001);
     if (depth + bias < lpos.z)
         return color * float4(0.3, 0.3, 0.3, 1);
-    return color;
+    */
+    if (input.shadow_flag == 0)
+        return color * float4(0.3, 0.3, 0.3, 1);
+    float sp = input.shadow_flag / 15.f;
+    if (sp != 1)
+        sp *= 0.6;
+    return color * float4(sp, sp, sp, 1);
 }

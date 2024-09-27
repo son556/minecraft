@@ -146,7 +146,7 @@ struct VertexBlockUV {
 	vec3 normal;
 	vec2 uv;
 	int dir;
-	//int x_pos;
+	int shadow_flag = 0;
 };
 
 struct VertexBlock {
