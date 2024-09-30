@@ -118,6 +118,12 @@
     <Filter Include="소스 파일\World\Map\System\RenderSystem">
       <UniqueIdentifier>{11ebfda0-cf85-41ab-91e0-59d22b3d82dc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\InputLayouts">
+      <UniqueIdentifier>{8c0d1be0-0a0b-43af-bdb2-f69925e6ed2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\Map\System\LightSystem\LightUtils">
+      <UniqueIdentifier>{7823df89-7b72-44b6-ae69-5d01a89620c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -213,6 +219,12 @@
     <ClInclude Include="RenderSystem.h">
       <Filter>소스 파일\World\Map\System\RenderSystem</Filter>
     </ClInclude>
+    <ClInclude Include="InputLayouts.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\InputLayouts</Filter>
+    </ClInclude>
+    <ClInclude Include="MyQueue.h">
+      <Filter>소스 파일\World\Map\System\LightSystem\LightUtils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -298,6 +310,12 @@
     </ClCompile>
     <ClCompile Include="RenderSystem.cpp">
       <Filter>소스 파일\World\Map\System\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLayouts.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\InputLayouts</Filter>
+    </ClCompile>
+    <ClCompile Include="MyQueue.cpp">
+      <Filter>소스 파일\World\Map\System\LightSystem\LightUtils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
