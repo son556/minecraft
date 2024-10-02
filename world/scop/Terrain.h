@@ -20,6 +20,10 @@ public:
 	void deleteBlock(vec3 const& ray_pos, vec3 const& ray_dir);
 	pair<int, int> getBlock(float x, float y, float z);
 
+public: // test
+	void testClickLightBlock(vec3 const& ray_pos, 
+		vec3 const& ray_dir);
+
 public:
 	void setRenderPipeLine(int flag);
 	void DepthRender();

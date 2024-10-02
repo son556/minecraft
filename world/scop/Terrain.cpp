@@ -209,6 +209,43 @@ pair<int, int> Terrain::getBlock(float x, float y, float z)
 	return block_info;
 }
 
+void Terrain::testClickLightBlock(
+	vec3 const& ray_pos, 
+	vec3 const& ray_dir)
+{
+	WorldIndex widx = this->m_manager->m_info.pickBlock(ray_pos, ray_dir);
+	if (widx.flag) {
+		WorldIndex add_idx;
+		Index2& cidx = widx.c_idx;
+		Index3& bidx = widx.b_idx;
+		vec3 const& pos = widx.pos;
+		int dir_flag = -1;
+		if (widx.dir == 0) {
+			if (ray_pos.y > pos.y && pos.y + 1 < 256)
+				add_idx = this->m_manager->m_info.getBlockIndex(pos.x, pos.y + 1, pos.z);
+			else if (ray_pos.y < pos.y && pos.y - 1 > -1)
+				add_idx = this->m_manager->m_info.getBlockIndex(pos.x, pos.y - 1, pos.z);
+		}
+		else if (widx.dir == 1) {
+			if (ray_pos.z < pos.z)
+				add_idx = this->m_manager->m_info.getBlockIndex(pos.x, pos.y, pos.z - 1);
+			else
+				add_idx = this->m_manager->m_info.getBlockIndex(pos.x, pos.y, pos.z + 1);
+		}
+		else {
+			if (ray_pos.x < pos.x)
+				add_idx = this->m_manager->m_info.getBlockIndex(pos.x - 1, pos.y, pos.z);
+			else
+				add_idx = this->m_manager->m_info.getBlockIndex(pos.x + 1, pos.y, pos.z);
+		}
+		cidx = add_idx.c_idx;
+		bidx = add_idx.b_idx;
+		cout << "block idx: " << bidx.x << ' ' << bidx.y << ' ' << bidx.z << endl;
+		int light = this->m_manager->m_info.findLight(cidx, bidx);
+		cout << "block light: " << light << endl << endl;
+	}
+}
+
 void Terrain::setSightChunk(int cnt)
 {
 	int max_fov = min(this->m_manager->m_info.size_h - 1, 

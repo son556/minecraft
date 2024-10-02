@@ -38,6 +38,7 @@ public:
 private:
 	void resetChunk(Index2 const& c_idx);
 	int checkTerrainBoundary(float x, float z) const;
+	void threadFunc(vector<Index2>& vec, int dir);
 
 public:
 	MapUtils m_info;

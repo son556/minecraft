@@ -13,7 +13,8 @@ Map::Map(
 	int fov_chunk, 
 	int thread_cnt,
 	shared_ptr<Graphics> graphic
-) : m_info(size_w, size_h), l_system(&m_info), t_system(&m_info), r_system(&m_info)
+) : m_info(size_w, size_h), l_system(&m_info, thread_cnt), 
+	t_system(&m_info), r_system(&m_info)
 {
 	this->c_fov = fov_chunk;
 	this->thread_cnt = thread_cnt;
@@ -111,9 +112,7 @@ void Map::vertexAndIndexGenerator(
 					if (next.z == 16 && this->m_info.findBlock(adj_idx, next.x, next.y, 0))
 						continue;
 				}
-				if (this->m_info.inChunkBoundary(next.x, next.y, next.z))
-					shadow_flag = this->m_info.findLight(c_idx, next.x, next.y, next.z);
-				else if (next.x == -1)
+				if (next.x == -1)
 					shadow_flag = this->m_info.findLight(adj_idx, 15, y, z);
 				else if (next.x == 16)
 					shadow_flag = this->m_info.findLight(adj_idx, 0, y, z);
@@ -125,6 +124,8 @@ void Map::vertexAndIndexGenerator(
 					shadow_flag = 0;
 				else if (next.y == 256)
 					shadow_flag = 15;
+				else
+					shadow_flag = this->m_info.findLight(c_idx, next.x, next.y, next.z);
 				Block::addBlockFacePosAndTex(
 					this->m_info.chunks[c_idx.y][c_idx.x]->start_pos,
 					dir,
@@ -164,6 +165,7 @@ void Map::chunksSetVerticesAndIndices(
 	ed = min(ed, v_idx.size());
 	for (int i = st; i < ed; i++) {
 		Index2 const& c_idx = v_idx[i];
+		this->m_info.chunks[c_idx.y][c_idx.x]->vertices_idx = 0;
 		Index2 apos = this->m_info.chunks[c_idx.y][c_idx.x]->chunk_pos;
 		for (int dir = 0; dir < 6; dir++) {
 			Index2 pos = apos + Index2(16 * move_arr[dir].x,
@@ -210,20 +212,13 @@ void Map::userPositionCheck(float x, float z)
 	Index2 cidx, cpos;
 	if (mask == 1) {
 		for (int i = 0; i < this->m_info.size_h; i++) {
-			if (i && i < this->m_info.size_h - 1) {
+			if (i && i < this->m_info.size_h - 1) { // 보여주기
 				cpos = Index2(this->m_info.s_pos.x, this->m_info.s_pos.y - 16 * i);
 				cidx = this->m_info.findChunkIndex(cpos.x, cpos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->reset();
-				this->m_info.chunks[cidx.y][cidx.x]->setPos(cpos);
-				this->resetChunk(cidx);
-				this->t_system.fillChunk(cidx, cpos);
-				this->l_system.fillLight(cidx);
 				v_idxs.push_back(cidx);
-				cidx = this->m_info.findChunkIndex(this->m_info.ev_pos.x - 16, cpos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->render_flag = false;
 			}
 			cpos = this->m_info.s_pos + Index2(-16, -16 * i);
-			f_pos.push_back(cpos);
+			f_pos.push_back(cpos); // 새로 만들기
 		}
 		this->m_info.sv_pos.x -= 16;
 		this->m_info.s_pos.x -= 16;
@@ -234,14 +229,7 @@ void Map::userPositionCheck(float x, float z)
 			if (i && i < this->m_info.size_h - 1) {
 				cpos = Index2(this->m_info.ev_pos.x, this->m_info.s_pos.y - 16 * i);
 				cidx = this->m_info.findChunkIndex(cpos.x, cpos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->reset();
-				this->m_info.chunks[cidx.y][cidx.x]->setPos(cpos);
-				this->resetChunk(cidx);
-				this->t_system.fillChunk(cidx, cpos);
-				this->l_system.fillLight(cidx);
 				v_idxs.push_back(cidx);
-				cidx = this->m_info.findChunkIndex(this->m_info.sv_pos.x, cpos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->render_flag = false;
 			}
 			cpos.x = this->m_info.ev_pos.x + 16;
 			cpos.y = this->m_info.s_pos.y - 16 * i;
@@ -256,14 +244,7 @@ void Map::userPositionCheck(float x, float z)
 			if (i && i < this->m_info.size_w - 1) {
 				cpos = Index2(this->m_info.s_pos.x + 16 * i, this->m_info.s_pos.y);
 				cidx = this->m_info.findChunkIndex(cpos.x, cpos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->reset();
-				this->m_info.chunks[cidx.y][cidx.x]->setPos(cpos);
-				this->resetChunk(cidx);
-				this->t_system.fillChunk(cidx, cpos);
-				this->l_system.fillLight(cidx);
 				v_idxs.push_back(cidx);
-				cidx = this->m_info.findChunkIndex(cpos.x, this->m_info.ev_pos.y + 16);
-				this->m_info.chunks[cidx.y][cidx.x]->render_flag = false;
 			}
 			cpos = this->m_info.s_pos + Index2(16 * i, 16);
 			f_pos.push_back(cpos);
@@ -277,14 +258,7 @@ void Map::userPositionCheck(float x, float z)
 			if (i && i < this->m_info.size_w - 1) {
 				cpos = Index2(this->m_info.s_pos.x + 16 * i, this->m_info.ev_pos.y);
 				cidx = this->m_info.findChunkIndex(cpos.x, cpos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->reset();
-				this->m_info.chunks[cidx.y][cidx.x]->setPos(cpos);
-				this->resetChunk(cidx);
-				this->t_system.fillChunk(cidx, cpos);
-				this->l_system.fillLight(cidx);
 				v_idxs.push_back(cidx);
-				cidx = this->m_info.getChunkIndex(cpos.x, this->m_info.sv_pos.y);
-				this->m_info.chunks[cidx.y][cidx.x]->render_flag = false;
 			}
 			cpos.x = this->m_info.s_pos.x + 16 * i;
 			cpos.y = this->m_info.ev_pos.y - 16;
@@ -301,27 +275,32 @@ void Map::userPositionCheck(float x, float z)
 			this->m_info.chunks[cidx.y][cidx.x]->setPos(pos);
 			this->resetChunk(cidx);
 			this->t_system.fillChunk(cidx, pos);
-			this->l_system.fillLight(cidx);
 		}
 	}
-	if (v_idxs.size()) {
-		vector<thread> threads;
-		int t = v_idxs.size() / this->thread_cnt;
-		int m = v_idxs.size() % this->thread_cnt;
-		int st = 0;
-		int siz;
-		for (int i = 0; i < this->thread_cnt; i++) {
-			if (m) {
-				siz = t + 1;
-				m--;
-			}
-			else
-				siz = t;
-			threads.push_back(thread(&Map::chunksSetVerticesAndIndices,
-				this, v_idxs, st, st + siz));
-			st = st + siz;
+	if (v_idxs.size())
+		this->threadFunc(v_idxs, mask);
+}
+
+void Map::threadFunc(vector<Index2>& vec, int dir)
+{
+	vector<thread> threads;
+	this->l_system.createLightMap(vec, dir);
+	int t = vec.size() / this->thread_cnt;
+	int m = vec.size() % this->thread_cnt;
+	int st = 0;
+	int siz;
+	int idx = 0;
+	for (int i = 0; i < this->thread_cnt; i++) {
+		if (m) {
+			siz = t + 1;
+			m--;
 		}
-		for (int i = 0; i < this->thread_cnt; i++)
-			threads[i].join();
+		else
+			siz = t;
+		threads.push_back(thread(&Map::chunksSetVerticesAndIndices,
+			this, vec, st, st + siz));
+		st = st + siz;
 	}
+	for (int i = 0; i < this->thread_cnt; i++)
+		threads[i].join();
 }
