@@ -24,6 +24,9 @@ public: // test
 	void testClickLightBlock(vec3 const& ray_pos, 
 		vec3 const& ray_dir);
 
+public: // temp
+	shared_ptr<Graphics> getGraphic();
+
 public:
 	void setRenderPipeLine(int flag);
 	void DepthRender();

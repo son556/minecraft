@@ -11,6 +11,7 @@ class VertexShader;
 class PixelShader;
 class InputLayout;
 class MapUtils;
+class DefferedRendering;
 
 class RenderSystem
 {

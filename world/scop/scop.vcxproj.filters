@@ -124,6 +124,18 @@
     <Filter Include="소스 파일\World\Map\System\LightSystem\LightUtils">
       <UniqueIdentifier>{7823df89-7b72-44b6-ae69-5d01a89620c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\World\DefferedRendering">
+      <UniqueIdentifier>{ad67f954-44c5-402f-aa3d-e75ab747dac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\WorldShaderFIle\DefferedShader">
+      <UniqueIdentifier>{6272f0a6-5c5f-480d-9c2f-5bebc2bb704d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\WorldShaderFIle\DefferedShader\Geometry">
+      <UniqueIdentifier>{e6077c36-ad56-402f-9396-6e0000106c1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\WorldShaderFIle\DefferedShader\Shadow">
+      <UniqueIdentifier>{3e527fc0-a097-4aed-82eb-a9e4f74b3880}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -225,6 +237,9 @@
     <ClInclude Include="MyQueue.h">
       <Filter>소스 파일\World\Map\System\LightSystem\LightUtils</Filter>
     </ClInclude>
+    <ClInclude Include="DefferedRendering.h">
+      <Filter>소스 파일\World\DefferedRendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -317,6 +332,9 @@
     <ClCompile Include="MyQueue.cpp">
       <Filter>소스 파일\World\Map\System\LightSystem\LightUtils</Filter>
     </ClCompile>
+    <ClCompile Include="DefferedRendering.cpp">
+      <Filter>소스 파일\World\DefferedRendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scop.rc">
@@ -371,6 +389,24 @@
     </FxCompile>
     <FxCompile Include="DepthPixelShader.hlsl">
       <Filter>소스 파일\World\WorldShaderFIle\DepthShader</Filter>
+    </FxCompile>
+    <FxCompile Include="DefferedVS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader</Filter>
+    </FxCompile>
+    <FxCompile Include="DefferedPS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryVS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\Geometry</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryPS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\Geometry</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowVS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowPS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\Shadow</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

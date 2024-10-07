@@ -209,8 +209,31 @@ pair<int, int> Terrain::getBlock(float x, float y, float z)
 	return block_info;
 }
 
+void Terrain::setSightChunk(int cnt)
+{
+	int max_fov = min(this->m_manager->m_info.size_h - 1, 
+		this->m_manager->m_info.size_w - 1);
+	this->m_manager->setSightChunk(min(max_fov, cnt));
+}
+
+void Terrain::userPositionCheck(float x, float z)
+{
+	this->m_manager->userPositionCheck(x, z);
+}
+
+int16 Terrain::getHeight(float x, float z) const
+{
+	WorldIndex w_idx = m_manager->m_info.getBlockIndex(x, 0, z);
+	return m_manager->m_info.findHeight(w_idx.c_idx, w_idx.b_idx);
+}
+
+shared_ptr<Graphics> Terrain::getGraphic()
+{
+	return this->graphic;
+}
+
 void Terrain::testClickLightBlock(
-	vec3 const& ray_pos, 
+	vec3 const& ray_pos,
 	vec3 const& ray_dir)
 {
 	WorldIndex widx = this->m_manager->m_info.pickBlock(ray_pos, ray_dir);
@@ -244,22 +267,4 @@ void Terrain::testClickLightBlock(
 		int light = this->m_manager->m_info.findLight(cidx, bidx);
 		cout << "block light: " << light << endl << endl;
 	}
-}
-
-void Terrain::setSightChunk(int cnt)
-{
-	int max_fov = min(this->m_manager->m_info.size_h - 1, 
-		this->m_manager->m_info.size_w - 1);
-	this->m_manager->setSightChunk(min(max_fov, cnt));
-}
-
-void Terrain::userPositionCheck(float x, float z)
-{
-	this->m_manager->userPositionCheck(x, z);
-}
-
-int16 Terrain::getHeight(float x, float z) const
-{
-	WorldIndex w_idx = m_manager->m_info.getBlockIndex(x, 0, z);
-	return m_manager->m_info.findHeight(w_idx.c_idx, w_idx.b_idx);
 }
