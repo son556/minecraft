@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Map.h"
 #include "Chunk.h"
+#include "DeferredGraphics.h"
 #include "Graphics.h"
 #include "Block.h"
 #include <thread>
-
 #include <time.h>
 
 Map::Map(
@@ -12,14 +12,21 @@ Map::Map(
 	int size_h, 
 	int fov_chunk, 
 	int thread_cnt,
-	shared_ptr<Graphics> graphic
-) : m_info(size_w, size_h), l_system(&m_info, thread_cnt), 
+	HWND hwnd,
+	UINT window_w,
+	UINT window_h
+) : m_info(size_w, size_h, hwnd, window_w, window_h), 
+	l_system(&m_info, thread_cnt), 
 	t_system(&m_info), r_system(&m_info)
 {
 	this->c_fov = fov_chunk;
 	this->thread_cnt = thread_cnt;
-	this->graphic = graphic;
-	this->r_system.setGraphic(this->graphic);
+}
+
+void Map::setDeffGraphic(shared_ptr<DeferredGraphics> defer_graphic)
+{
+	this->d_graphic = defer_graphic.get();
+	this->r_system.setDeffGraphics(this->d_graphic);
 	clock_t start, finish;
 	start = clock();
 	this->t_system.createHeightMap();
@@ -30,7 +37,7 @@ Map::Map(
 	finish = clock();
 	cout << "set light(ms): " << static_cast<double>(finish - start) << endl;
 	start = clock();
-	this->terrainsetVerticesAndIndices();
+	this->terrainSetVerticesAndIndices();
 	finish = clock();
 	cout << "set vi(ms): " << static_cast<double>(finish - start) << endl;
 }
@@ -48,7 +55,7 @@ void Map::resetChunk(Index2 const& c_idx)
 	}
 }
 
-void Map::terrainsetVerticesAndIndices()
+void Map::terrainSetVerticesAndIndices()
 {
 	vector<Index2> v_idxs;
 	int c_cnt = (this->m_info.size_h - 2) * (this->m_info.size_w - 2);
@@ -85,13 +92,12 @@ void Map::vertexAndIndexGenerator(
 	Index2 const& adj_idx,
 	Index3 const& move,
 	int dir,
-	vector<VertexBlockUV>& vertices,
+	vector<VertexGeo>& vertices,
 	vector<uint32>& indices
 )
 {
 	uint32 index = this->m_info.chunks[c_idx.y][c_idx.x]->vertices_idx;
 	int16& max_h = this->m_info.chunks[c_idx.y][c_idx.x]->max_h;
-	int shadow_flag;
 	for (int y = 0; y < max_h; y++) {
 		for (int z = 0; z < 16; z++) {
 			for (int x = 0; x < 16; x++) {
@@ -100,6 +106,50 @@ void Map::vertexAndIndexGenerator(
 					continue;
 				Index3 next(x + move.x, y + move.y, z - move.z); // index
 				if (this->m_info.inChunkBoundary(next.x, next.y, next.z) 
+					&& this->m_info.findBlock(c_idx, next))
+					continue;
+				if (adj_idx.flag) {
+					if (next.x == -1 && this->m_info.findBlock(adj_idx, 15, next.y, next.z))
+						continue;
+					if (next.x == 16 && this->m_info.findBlock(adj_idx, 0, next.y, next.z))
+						continue;
+					if (next.z == -1 && this->m_info.findBlock(adj_idx, next.x, next.y, 15))
+						continue;
+					if (next.z == 16 && this->m_info.findBlock(adj_idx, next.x, next.y, 0))
+						continue;
+				}
+				Block::addBlockFacePosAndTex(
+					this->m_info.chunks[c_idx.y][c_idx.x]->start_pos,
+					dir,
+					x, y, z, type,
+					vertices
+				);
+				Block::addBlockFaceIndices(index, indices);
+				index += 4;
+			}
+		}
+	}
+	this->m_info.chunks[c_idx.y][c_idx.x]->vertices_idx = index;
+}
+
+void Map::vertexShadowGenerator(
+	Index2 const& c_idx, 
+	Index2 const& adj_idx, 
+	Index3 const& move, 
+	int dir, 
+	vector<VertexShadow>& vertices
+)
+{
+	int16& max_h = this->m_info.chunks[c_idx.y][c_idx.x]->max_h;
+	int shadow_flag;
+	for (int y = 0; y < max_h; y++) {
+		for (int z = 0; z < 16; z++) {
+			for (int x = 0; x < 16; x++) {
+				int type = this->m_info.findBlock(c_idx, x, y, z);
+				if (type == 0)
+					continue;
+				Index3 next(x + move.x, y + move.y, z - move.z);
+				if (this->m_info.inChunkBoundary(next.x, next.y, next.z)
 					&& this->m_info.findBlock(c_idx, next))
 					continue;
 				if (adj_idx.flag) {
@@ -128,17 +178,13 @@ void Map::vertexAndIndexGenerator(
 					shadow_flag = this->m_info.findLight(c_idx, next.x, next.y, next.z);
 				Block::addBlockFacePosAndTex(
 					this->m_info.chunks[c_idx.y][c_idx.x]->start_pos,
-					dir,
-					x, y, z, type,
+					x, y, z, dir,
 					shadow_flag,
 					vertices
 				);
-				Block::addBlockFaceIndices(index, indices);
-				index += 4;
 			}
 		}
 	}
-	this->m_info.chunks[c_idx.y][c_idx.x]->vertices_idx = index;
 }
 
 void Map::setSightChunk(int chunk_cnt)
@@ -160,7 +206,8 @@ void Map::chunksSetVerticesAndIndices(
 		Index3(-1, 0, 0),
 		Index3(1, 0, 0)
 	};
-	vector<VertexBlockUV> vertices;
+	vector<VertexGeo> vertices_geo;
+	vector<VertexShadow> vertices_shadow;
 	vector<uint32> indices;
 	ed = min(ed, v_idx.size());
 	for (int i = st; i < ed; i++) {
@@ -176,16 +223,29 @@ void Map::chunksSetVerticesAndIndices(
 				adj_idx,
 				move_arr[dir],
 				dir,
-				vertices,
+				vertices_geo,
 				indices
 			);
+			this->vertexShadowGenerator(
+				c_idx,
+				adj_idx,
+				move_arr[dir],
+				dir,
+				vertices_shadow
+			);
 		}
-		this->m_info.chunks[c_idx.y][c_idx.x]->createVIBuffer(
-			this->graphic,
-			vertices,
+		this->m_info.chunks[c_idx.y][c_idx.x]->createGeoBuffer(
+			this->d_graphic->getDevice(),
+			vertices_geo,
 			indices
 		);
-		vertices.clear();
+		this->m_info.chunks[c_idx.y][c_idx.x]->createShadowBuffer(
+			this->d_graphic->getDevice(),
+			vertices_shadow,
+			indices
+		);
+		vertices_shadow.clear();
+		vertices_geo.clear();
 		indices.clear();
 	}
 }

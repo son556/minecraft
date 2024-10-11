@@ -4,8 +4,15 @@ struct PS_INPUT
     int shadow_flag : SHADOW;
 };
 
-float4 main(PS_INPUT input) : SV_TARGET
+struct PS_OUT
 {
+    float4 shadow : SV_Target0;
+};
+
+PS_OUT main(PS_INPUT input)
+{
+    PS_OUT  output;
     float3 shadow = input.shadow_flag * float3(1, 1, 1);
-	return float4(shadow, 1.0f);
+	output.shadow  = float4(shadow, 1);
+    return output;
 }

@@ -2,17 +2,6 @@
 
 #include <set>
 
-class PixelShader;
-class VertexShader;
-template<typename T> class Buffer;
-class Graphics;
-class ConstantBuffer;
-class RasterizerState;
-class BlendState;
-class InputLayout;
-class SamplerState;
-class TextureArray;
-
 enum class Face {
 	Top,
 	Bottom,
@@ -179,6 +168,11 @@ struct VertexGeo { // temp
 struct VertexShadow { // temp
 	vec3 pos;
 	int shadow_flag = 0;
+};
+
+struct VertexDeffer {
+	vec3 pos;
+	vec2 uv;
 };
 
 struct VertexBlock {

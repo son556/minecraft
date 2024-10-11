@@ -33,6 +33,7 @@ PS_INPUT main(VS_INPUT input)
     output.normal = input.normal;
     output.uv = input.uv;
     output.dir = input.dir;
+    output.type = input.type;
     
     output.pos = mul(output.pos, world);
     output.pos = mul(output.pos, view);

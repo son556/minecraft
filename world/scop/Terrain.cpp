@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Terrain.h"
-#include "Graphics.h"
 #include "Chunk.h"
+#include "DeferredGraphics.h"
+#include "Graphics.h"
 
 Terrain::Terrain(
 	int size_w,
@@ -13,48 +14,35 @@ Terrain::Terrain(
 	int thread_cnt
 )
 {
-	this->graphic = make_shared<Graphics>(hwnd, width, height);
+	this->deff_graphic = 
+		make_shared<DeferredGraphics>(hwnd, width, height);
 	this->m_manager = make_shared<Map>(
 		size_w,
 		size_h,
 		fov_chunk,
 		thread_cnt,
-		this->graphic
+		hwnd,
+		width,
+		height
 	);
+	this->m_manager->setDeffGraphic(this->deff_graphic);
 }
 
 Terrain::~Terrain()
 {
 }
 
-void Terrain::setRender(int depth_flag)
-{
-	if (depth_flag)
-		this->m_manager->r_system.setDepthRender();
-	this->m_manager->r_system.setRender();
-}
-
-void Terrain::setRenderPipeLine(int flag)
-{
-	if (flag == 0)
-		this->m_manager->r_system.setPipeLine();
-	else
-		this->m_manager->r_system.setDepthPipeLine();
-}
-
-void Terrain::DepthRender()
-{
-	this->m_manager->r_system.depthRender();
-}
-
 void Terrain::Render
 (
 	Mat const& cam_view,
 	Mat const& cam_proj,
-	vec3 const& cam_pos
+	vec3 const& cam_pos,
+	Mat const& shadow_view,
+	Mat const& shadow_proj
 )
 {
-	this->m_manager->r_system.Render(cam_view, cam_proj, cam_pos);
+	this->m_manager->r_system.Render(cam_view, 
+		cam_proj, cam_pos, shadow_view, shadow_proj);
 }
 
 void Terrain::putBlock(
@@ -225,11 +213,6 @@ int16 Terrain::getHeight(float x, float z) const
 {
 	WorldIndex w_idx = m_manager->m_info.getBlockIndex(x, 0, z);
 	return m_manager->m_info.findHeight(w_idx.c_idx, w_idx.b_idx);
-}
-
-shared_ptr<Graphics> Terrain::getGraphic()
-{
-	return this->graphic;
 }
 
 void Terrain::testClickLightBlock(
