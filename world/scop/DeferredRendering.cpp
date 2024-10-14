@@ -116,6 +116,11 @@ void DeferredRendering::Render(
 		1,
 		this->s_render.getSRV().GetAddressOf()
 	);
+	context->PSSetShaderResources(
+		4,
+		1,
+		this->s_render.getDepthSRV().GetAddressOf()
+	);
 	context->DrawIndexed(
 		this->ibuffer->getCount(),
 		0,

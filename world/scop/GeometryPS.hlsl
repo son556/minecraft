@@ -47,7 +47,7 @@ PS_OUTPUT main(PS_INPUT input)
     float offset = (input.type - 1) * 3;
     PS_OUTPUT output;
     
-    output.normal = float4(input.normal, 0);
+    output.normal = float4(input.normal, 1);
     output.position = float4(input.world_pos, 1);
     if (input.dir == 0 || input.dir == 1)
         uvw = float3(input.uv, input.dir + offset);

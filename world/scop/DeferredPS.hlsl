@@ -2,6 +2,7 @@ Texture2D color_map : register(t0);
 Texture2D normal_map : register(t1);
 Texture2D position_map : register(t2);
 Texture2D shadow_map : register(t3);
+Texture2D depth_map : register(t4);
 
 SamplerState sampler0 : register(s0);
 
@@ -19,7 +20,6 @@ cbuffer Index : register(b0)
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    // test
     float4 color = color_map.Sample(sampler0, input.uv);
     float sp = shadow_map.Sample(sampler0, input.uv).r;
     sp /= 15.f;
