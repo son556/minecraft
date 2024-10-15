@@ -24,22 +24,6 @@ cbuffer eyePos : register(b0)
     float r;
 };
 
-
-float4 colorTest(int dir)
-{
-    if (dir == 0)
-        return float4(1, 0, 0, 1);
-    else if (dir == 1)
-        return float4(0, 1, 0, 1);
-    else if (dir >= 2)
-        return float4(0, 0, 1, 1);
-    else if (dir == 3)
-        return float4(1, 1, 0, 1);
-    else if (dir == 4)
-        return float4(1, 0, 1, 1);
-    return float4(0, 1, 1, 1);
-}
-
 PS_OUTPUT main(PS_INPUT input)
 {
     float4 color;
@@ -60,8 +44,8 @@ PS_OUTPUT main(PS_INPUT input)
     float dist = pos.y - input.world_pos.y;
     float distMin = 10.0;
     float distMax = 50.0;
-    float lod = 5 * saturate((dist - distMin) / (distMax - distMin));
-    color = texture_arr.SampleLevel(sampler0, uvw, lod);
+    float lod = 5 * saturate((dist - distMin) / (distMax - distMin)); // 나중에
+    color = texture_arr.SampleLevel(sampler0, uvw, 0);
     output.color = color;
     
     return output;

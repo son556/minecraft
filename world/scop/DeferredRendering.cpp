@@ -11,6 +11,14 @@
 #include "Buffer.h"
 #include "ConstantBuffer.h"
 #include "BlendState.h"
+#include "Texture.h"
+
+struct defferConst {
+	int idx;
+	vec3 padding;
+	vec2 screen;
+	vec2 dummy;
+};
 
 DeferredRendering::DeferredRendering(
 	MapUtils* minfo,
@@ -84,6 +92,10 @@ DeferredRendering::DeferredRendering(
 		D3D11_BIND_INDEX_BUFFER
 	);
 	this->blend_state = make_shared<BlendState>(device);
+	this->texture = make_shared<Texture>(
+		device,
+		L"random_texture.png"
+	);
 }
 
 DeferredRendering::~DeferredRendering()
@@ -121,6 +133,11 @@ void DeferredRendering::Render(
 		1,
 		this->s_render.getDepthSRV().GetAddressOf()
 	);
+	context->PSSetShaderResources(
+		5,
+		1,
+		this->texture->getComPtr().GetAddressOf()
+	);
 	context->DrawIndexed(
 		this->ibuffer->getCount(),
 		0,
@@ -151,27 +168,28 @@ void DeferredRendering::setPipe()
 		DXGI_FORMAT_R32_UINT,
 		0
 	);
-	MVP mvp;
-	ConstantBuffer cbuffer(
-		this->d_graphic->getDevice(),
-		context,
-		mvp
-	);
 	context->VSSetShader(
 		this->vertex_shader->getComPtr().Get(),
 		nullptr,
 		0
 	);
-	context->VSSetConstantBuffers(0, 1,
-		cbuffer.getComPtr().GetAddressOf());
 	context->RSSetState(
 		this->rasterizer_state->getComPtr().Get()
+	);
+	defferConst dc;
+	dc.idx = 1;
+	dc.screen = vec2(this->m_info->width, this->m_info->height);
+	ConstantBuffer cbuffer(
+		this->d_graphic->getDevice(),
+		context,
+		dc
 	);
 	context->PSSetShader(
 		this->pixel_shader->getComPtr().Get(),
 		nullptr,
 		0
 	);
+	context->PSSetConstantBuffers(0, 1, cbuffer.getComPtr().GetAddressOf());
 	context->PSSetSamplers(
 		0,
 		1,
