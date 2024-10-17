@@ -15,16 +15,16 @@
 
 struct defferConst {
 	int idx;
-	vec3 padding;
-	vec2 screen;
-	vec2 dummy;
+	vec3 cam_pos;
+	Mat proj;
 };
 
 DeferredRendering::DeferredRendering(
 	MapUtils* minfo,
 	DeferredGraphics* defer_graphic
 )
-	: m_info(minfo), s_render(minfo, defer_graphic), g_render(minfo, defer_graphic)
+	: m_info(minfo), s_render(minfo, defer_graphic), 
+	g_render(minfo, defer_graphic), ssao(defer_graphic->getDevice())
 {
 	this->d_graphic = defer_graphic;
 	ComPtr<ID3D11Device> device = this->d_graphic->getDevice();
@@ -115,6 +115,16 @@ void DeferredRendering::Render(
 	this->setPipe();
 	ComPtr<ID3D11DeviceContext> context;
 	context = this->d_graphic->getContext();
+	defferConst dc;
+	dc.idx = 1;
+	dc.cam_pos = cam_pos;
+	dc.proj = cam_proj.Transpose();
+	ConstantBuffer cbuffer(
+		this->d_graphic->getDevice(),
+		this->d_graphic->getContext(),
+		dc
+	);
+	context->PSSetConstantBuffers(0, 1, cbuffer.getComPtr().GetAddressOf());
 	this->d_graphic->renderBegin();
 	for (int i = 0; i < 3; i++) {
 		context->PSSetShaderResources(
@@ -136,7 +146,7 @@ void DeferredRendering::Render(
 	context->PSSetShaderResources(
 		5,
 		1,
-		this->texture->getComPtr().GetAddressOf()
+		this->ssao.random_vec_SRV.GetAddressOf()
 	);
 	context->DrawIndexed(
 		this->ibuffer->getCount(),
@@ -176,20 +186,11 @@ void DeferredRendering::setPipe()
 	context->RSSetState(
 		this->rasterizer_state->getComPtr().Get()
 	);
-	defferConst dc;
-	dc.idx = 1;
-	dc.screen = vec2(this->m_info->width, this->m_info->height);
-	ConstantBuffer cbuffer(
-		this->d_graphic->getDevice(),
-		context,
-		dc
-	);
 	context->PSSetShader(
 		this->pixel_shader->getComPtr().Get(),
 		nullptr,
 		0
 	);
-	context->PSSetConstantBuffers(0, 1, cbuffer.getComPtr().GetAddressOf());
 	context->PSSetSamplers(
 		0,
 		1,
@@ -200,6 +201,12 @@ void DeferredRendering::setPipe()
 		this->blend_state->getBlendFactor(),
 		this->blend_state->getSampleMask()
 	);
+	ConstantBuffer cbuffer(
+		this->d_graphic->getDevice(),
+		context,
+		this->ssao.mOffsets
+	);
+	context->PSSetConstantBuffers(1, 1, cbuffer.getComPtr().GetAddressOf());
 }
 
 
