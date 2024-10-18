@@ -41,6 +41,7 @@ private:
 	GeoRender g_render;
 	InputLayouts layout;
 	Ssao ssao;
+	D3D11_VIEWPORT view_port = { 0, };
 	DeferredGraphics* d_graphic;
 	shared_ptr<Texture> texture;
 	shared_ptr<RasterizerState> rasterizer_state;

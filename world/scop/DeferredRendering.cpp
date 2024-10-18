@@ -96,6 +96,12 @@ DeferredRendering::DeferredRendering(
 		device,
 		L"random_texture.png"
 	);
+	this->view_port.TopLeftX = 0.0f;
+	this->view_port.TopLeftY = 0.0f;
+	this->view_port.Width = this->m_info->width / 2.0f;
+	this->view_port.Height = this->m_info->height / 2.0f;
+	this->view_port.MinDepth = 0.f;
+	this->view_port.MaxDepth = 1.f;
 }
 
 DeferredRendering::~DeferredRendering()
@@ -126,6 +132,7 @@ void DeferredRendering::Render(
 	);
 	context->PSSetConstantBuffers(0, 1, cbuffer.getComPtr().GetAddressOf());
 	this->d_graphic->renderBegin();
+	//this->d_graphic->setViewPort(this->view_port);
 	for (int i = 0; i < 3; i++) {
 		context->PSSetShaderResources(
 			i,

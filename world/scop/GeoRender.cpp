@@ -89,6 +89,7 @@ void GeoRender::render(
 	CamPos cam;
 	cam.pos = cam_pos;
 	cam.r = 0;
+	cam.view = view.Transpose();
 	ConstantBuffer cpbuffer(
 		this->d_graphic->getDevice(),
 		context,

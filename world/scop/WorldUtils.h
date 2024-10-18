@@ -184,6 +184,7 @@ struct VertexBlock {
 struct CamPos {
 	vec3 pos;
 	float r;
+	Mat view;
 };
 
 struct Light {
