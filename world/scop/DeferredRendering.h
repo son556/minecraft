@@ -43,7 +43,6 @@ private:
 	Ssao ssao;
 	D3D11_VIEWPORT view_port = { 0, };
 	DeferredGraphics* d_graphic;
-	shared_ptr<Texture> texture;
 	shared_ptr<RasterizerState> rasterizer_state;
 	shared_ptr<SamplerState> sampler_state;
 	shared_ptr<VertexShader> vertex_shader;

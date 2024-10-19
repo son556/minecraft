@@ -7,6 +7,21 @@ Texture2D random_map : register(t5);
 
 SamplerState sampler0 : register(s0);
 
+SamplerState normal_depth_sampler
+{
+    Filter = MIN_MAG_LINEAR_MIP_POINT;
+    AddressU = BORDER;
+    AddressV = BORDER;
+    BorderColor = float4(0.0f, 0.0f, 0.0f, 1e5f);
+};
+
+SamplerState random_vector_sampler
+{
+    Filter = MIN_MAG_LINEAR_MIP_POINT;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 struct PS_INPUT
 {
     float4 pos : SV_Position;
@@ -28,7 +43,7 @@ cbuffer Offset : register(b1)
 static float g_surface_epsilon = 0.05f;
 static float g_occlusion_fade_end = 2.0f;
 static float g_occlusion_fade_start = 0.2f;
-static float g_occlusion_r = 0.3f;
+static float g_occlusion_r = 0.5;
 
 float occlusionFunction(float dist_z)
 {
@@ -62,9 +77,9 @@ float4 main(PS_INPUT input) : SV_TARGET
     sp /= 15.f;
     sp = max(sp, 0.3);
     
-    float3 n = normal_map.Sample(sampler0, input.uv).xyz;
+    float3 n = normal_map.Sample(normal_depth_sampler, input.uv).xyz;
     float3 p = position_map.Sample(sampler0, input.uv).xyz;
-    float3 rand_vec = random_map.Sample(sampler0, input.uv).xyz;
+    float3 rand_vec = random_map.Sample(random_vector_sampler, input.uv).xyz;
     rand_vec = 2.0f * rand_vec - 1.0f;
     float total_occlusion = 0.0f;
     for (int i = 0; i < 14; i++)
@@ -75,9 +90,7 @@ float4 main(PS_INPUT input) : SV_TARGET
         float4 ndc_q = mul(float4(q, 1), proj);
         ndc_q /= ndc_q.w;
         float2 uv = ndcToTextureUV(ndc_q.xy);
-        if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
-            continue;
-        float rz = depth_map.Sample(sampler0, uv).r;
+        float rz = depth_map.Sample(normal_depth_sampler, uv).r;
         rz = ndcDepthToViewDepth(rz);
         float3 r = (rz / q.z) * q;
         

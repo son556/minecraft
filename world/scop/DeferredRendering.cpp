@@ -11,7 +11,6 @@
 #include "Buffer.h"
 #include "ConstantBuffer.h"
 #include "BlendState.h"
-#include "Texture.h"
 
 struct defferConst {
 	int idx;
@@ -52,6 +51,7 @@ DeferredRendering::DeferredRendering(
 		layout.layout_deferred.size(),
 		this->vertex_shader->getBlob()
 	);
+
 	vector<vec3> sample_pos = {
 		// front
 		{-1.f, -1.f, 0.f},
@@ -92,10 +92,6 @@ DeferredRendering::DeferredRendering(
 		D3D11_BIND_INDEX_BUFFER
 	);
 	this->blend_state = make_shared<BlendState>(device);
-	this->texture = make_shared<Texture>(
-		device,
-		L"random_texture.png"
-	);
 	this->view_port.TopLeftX = 0.0f;
 	this->view_port.TopLeftY = 0.0f;
 	this->view_port.Width = this->m_info->width / 2.0f;
