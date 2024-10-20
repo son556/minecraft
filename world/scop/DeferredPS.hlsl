@@ -30,8 +30,6 @@ struct PS_INPUT
 
 cbuffer Index : register(b0) 
 {
-    int idx;
-    float3 cam_pos;
     matrix proj; // projection matrix
 };
 
@@ -75,7 +73,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     float4 color = color_map.Sample(sampler0, input.uv);
     float sp = shadow_map.Sample(sampler0, input.uv).r;
     sp /= 15.f;
-    sp = max(sp, 0.3);
+    sp = max(sp, 0.1);
     
     float3 n = normal_map.Sample(normal_depth_sampler, input.uv).xyz;
     float3 p = position_map.Sample(sampler0, input.uv).xyz;

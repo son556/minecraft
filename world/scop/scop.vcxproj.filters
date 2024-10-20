@@ -145,6 +145,12 @@
     <Filter Include="소스 파일\World\DeferredGraphic">
       <UniqueIdentifier>{ad67f954-44c5-402f-aa3d-e75ab747dac0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\SsaoRender">
+      <UniqueIdentifier>{5f8d742e-9b44-44d0-a478-1f1af9607434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\SsaoRender\SsaoBlur">
+      <UniqueIdentifier>{239ac719-1e45-4ea0-a247-86c099614391}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -264,8 +270,11 @@
     <ClInclude Include="MathHelper.h">
       <Filter>소스 파일\World\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Ssao.h">
-      <Filter>소스 파일\World\Map\System\RenderSystem\DeferredRender</Filter>
+    <ClInclude Include="SsaoBlur.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SsaoRender\SsaoBlur</Filter>
+    </ClInclude>
+    <ClInclude Include="SsaoRender.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SsaoRender</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -377,8 +386,11 @@
     <ClCompile Include="MathHelper.cpp">
       <Filter>소스 파일\World\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Ssao.cpp">
-      <Filter>소스 파일\World\Map\System\RenderSystem\DeferredRender</Filter>
+    <ClCompile Include="SsaoBlur.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SsaoRender\SsaoBlur</Filter>
+    </ClCompile>
+    <ClCompile Include="SsaoRender.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SsaoRender</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

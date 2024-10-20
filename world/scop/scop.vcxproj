@@ -175,7 +175,8 @@
     <ClInclude Include="SamplerState.h" />
     <ClInclude Include="scop.h" />
     <ClInclude Include="ShadowRender.h" />
-    <ClInclude Include="Ssao.h" />
+    <ClInclude Include="SsaoRender.h" />
+    <ClInclude Include="SsaoBlur.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainSystem.h" />
     <ClInclude Include="Test.h" />
@@ -218,7 +219,8 @@
     <ClCompile Include="SamplerState.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ShadowRender.cpp" />
-    <ClCompile Include="Ssao.cpp" />
+    <ClCompile Include="SsaoRender.cpp" />
+    <ClCompile Include="SsaoBlur.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainSystem.cpp" />
     <ClCompile Include="Test.cpp" />

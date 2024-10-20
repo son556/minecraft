@@ -4,12 +4,11 @@
 #include "GeoRender.h"
 #include "WorldUtils.h"
 #include "BlendState.h"
-#include "Ssao.h"
+#include "SsaoRender.h"
 
 class DeferredGraphics;
 class MapUtils;
 template <typename T> class Buffer;
-class Graphics;
 class Texture;
 
 class DeferredRendering
@@ -29,25 +28,14 @@ public:
 	);
 
 private:
-	void setPipe();
-
-private:
 	shared_ptr<Buffer<VertexDeffer>> vbuffer;
 	shared_ptr<Buffer<uint32>> ibuffer;
 
 private:
 	MapUtils* m_info = nullptr;
+	DeferredGraphics* d_graphic;
 	ShadowRender s_render;
 	GeoRender g_render;
-	InputLayouts layout;
-	Ssao ssao;
-	D3D11_VIEWPORT view_port = { 0, };
-	DeferredGraphics* d_graphic;
-	shared_ptr<RasterizerState> rasterizer_state;
-	shared_ptr<SamplerState> sampler_state;
-	shared_ptr<VertexShader> vertex_shader;
-	shared_ptr<PixelShader> pixel_shader;
-	shared_ptr<InputLayout> input_layout;
-	shared_ptr<BlendState> blend_state;
+	SsaoRender ssao_render;
 };
 
