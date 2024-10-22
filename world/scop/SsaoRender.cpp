@@ -3,6 +3,7 @@
 #include "MathHelper.h"
 #include "DirectXPackedVector.h"
 #include "DeferredGraphics.h"
+#include "DeferredBuffer.h"
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "InputLayout.h"
@@ -18,6 +19,12 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 	this->buildOffset();
 	this->buildRandomVecTexture();
 	ComPtr<ID3D11Device> device = this->d_graphic->getDevice();
+	this->d_buffer = make_shared<DeferredBuffer>(1);
+	this->d_buffer->setRTVsAndSRVs(
+		device,
+		width / 2,
+		height / 2
+	);
 	this->rasterizer_state = make_shared<RasterizerState>(
 		device,
 		D3D11_FILL_SOLID,
@@ -26,28 +33,28 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 	this->sampler_state = make_shared<SamplerState>(device);
 	this->vertex_shader = make_shared<VertexShader>(
 		device,
-		L"DeferredVS.hlsl",
+		L"SsaoVS.hlsl",
 		"main",
 		"vs_5_0"
 	);
 	this->pixel_shader = make_shared<PixelShader>(
 		device,
-		L"DeferredPS.hlsl",
+		L"SsaoPS.hlsl",
 		"main",
 		"ps_5_0"
 	);
 	this->input_layout = make_shared<InputLayout>(
 		device,
-		layout.layout_deferred.data(),
-		layout.layout_deferred.size(),
+		this->layout.layout_deferred.data(),
+		this->layout.layout_deferred.size(),
 		this->vertex_shader->getBlob()
 	);
 
 	vector<vec3> sample_pos = {
 		// front
-		{-1.f, -1.f, 0.f},
-		{-1.f, +1.f, 0.f},
-		{+1.f, +1.f, 0.f},
+		{-1.0f, -1.0f, 0.f},
+		{-1.0f, +1.0f, 0.f},
+		{+1.0f, +1.0f, 0.f},
 		{+1.f, -1.f, 0.f},
 	};
 	vector<vec2> sample_uv = {
@@ -56,9 +63,9 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 		{1.f, 0.f},
 		{1.f, 1.f},
 	};
-	vector<VertexDeffer> vertices;
+	vector<VertexDefer> vertices;
 	vector<uint32> indices;
-	VertexDeffer v_deff;
+	VertexDefer v_deff;
 	for (int i = 0; i < 4; i++) {
 		v_deff.pos = sample_pos[i];
 		v_deff.uv = sample_uv[i];
@@ -70,7 +77,7 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 	indices.push_back(0);
 	indices.push_back(2);
 	indices.push_back(3);
-	this->vbuffer = make_shared<Buffer<VertexDeffer>>(
+	this->vbuffer = make_shared<Buffer<VertexDefer>>(
 		device,
 		vertices.data(),
 		vertices.size(),
@@ -85,8 +92,8 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 	this->blend_state = make_shared<BlendState>(device);
 	this->view_port.TopLeftX = 0.0f;
 	this->view_port.TopLeftY = 0.0f;
-	this->view_port.Width = width / 2.0f;
-	this->view_port.Height = height / 2.0f;
+	this->view_port.Width = width / 2;
+	this->view_port.Height = height / 2;
 	this->view_port.MinDepth = 0.f;
 	this->view_port.MaxDepth = 1.f;
 }
@@ -94,9 +101,9 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 void SsaoRender::render(Mat const& cam_proj)
 {
 	this->setPipe();
-	//this->d_graphic->setViewPort(this->view_port);
-	ComPtr<ID3D11DeviceContext> context;
-	context = this->d_graphic->getContext();
+	this->d_graphic->setViewPort(this->view_port);
+	ComPtr<ID3D11DeviceContext> context = 
+		this->d_graphic->getContext();
 	ConstantBuffer cbuffer(
 		this->d_graphic->getDevice(),
 		this->d_graphic->getContext(),
@@ -104,7 +111,7 @@ void SsaoRender::render(Mat const& cam_proj)
 	);
 	context->PSSetConstantBuffers(0, 1, cbuffer.getComPtr().GetAddressOf());
 	context->PSSetShaderResources(
-		5,
+		3,
 		1,
 		this->random_vec_SRV.GetAddressOf()
 	);
@@ -113,7 +120,19 @@ void SsaoRender::render(Mat const& cam_proj)
 		0,
 		0
 	);
+	context->Flush();
 }
+
+ComPtr<ID3D11ShaderResourceView> SsaoRender::getSRV()
+{
+	return this->d_buffer->getSRV(0);
+}
+
+shared_ptr<DeferredBuffer> SsaoRender::getDBuffer()
+{
+	return this->d_buffer;
+}
+
 
 void SsaoRender::setPipe()
 {

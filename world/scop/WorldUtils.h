@@ -170,7 +170,7 @@ struct VertexShadow { // temp
 	int shadow_flag = 0;
 };
 
-struct VertexDeffer {
+struct VertexDefer {
 	vec3 pos;
 	vec2 uv;
 };

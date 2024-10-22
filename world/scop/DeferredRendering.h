@@ -5,6 +5,7 @@
 #include "WorldUtils.h"
 #include "BlendState.h"
 #include "SsaoRender.h"
+#include "SsaoBlur.h"
 
 class DeferredGraphics;
 class MapUtils;
@@ -26,9 +27,13 @@ public:
 		Mat const& s_view,
 		Mat const& s_proj
 	);
+	
+private:
+	void setPipe();
+	void ssaoBlur(int cnt, Mat const& proj);
 
 private:
-	shared_ptr<Buffer<VertexDeffer>> vbuffer;
+	shared_ptr<Buffer<VertexDefer>> vbuffer;
 	shared_ptr<Buffer<uint32>> ibuffer;
 
 private:
@@ -37,5 +42,15 @@ private:
 	ShadowRender s_render;
 	GeoRender g_render;
 	SsaoRender ssao_render;
+	SsaoBlur ssao_blur;
+
+private:
+	InputLayouts layout;
+	D3D11_VIEWPORT view_port;
+	shared_ptr<VertexShader> vertex_shader;
+	shared_ptr<PixelShader> pixel_shader;
+	shared_ptr<SamplerState> sampler_state;
+	shared_ptr<RasterizerState> rasterizer_state;
+	shared_ptr<InputLayout> input_layout;
 };
 

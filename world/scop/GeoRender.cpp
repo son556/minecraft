@@ -118,7 +118,8 @@ ComPtr<ID3D11ShaderResourceView> GeoRender::getSRV(int idx)
 
 void GeoRender::setPipe()
 {
-	ComPtr<ID3D11DeviceContext> context = this->d_graphic->getContext();
+	ComPtr<ID3D11DeviceContext> context = 
+		this->d_graphic->getContext();
 	context->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	);
