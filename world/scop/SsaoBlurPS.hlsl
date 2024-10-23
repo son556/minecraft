@@ -15,13 +15,8 @@ cbuffer cbPerFrame : register(b0)
 
 cbuffer cbSettings : register(b1)
 {
-    //float gWeights[11] = {0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 
-        //0.1f, 0.1f, 0.1f, 0.05f, 0.05f};
-    float gWeights[11] =
-    {
-        1.f, 1.f, 1.f, 1.f, 1.f, 1.f,
-        1.f, 1.f, 1.f, 1.f, 1.f
-    };
+    static float gWeights[11] = {0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 
+        0.1f, 0.1f, 0.1f, 0.05f, 0.05f};
 };
 
 cbuffer cbFixed

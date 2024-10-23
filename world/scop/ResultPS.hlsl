@@ -25,7 +25,6 @@ float4 main(PS_INPUT input) : SV_TARGET
     sp /= 15.f;
     sp = max(sp, 0.1);
     float4 ssao = ssao_map.Sample(sampler0, input.uv);
-    return ssao;
     float4 res = float4(sp, sp, sp, 1) * ssao;
     return color * res;
 }
