@@ -89,7 +89,6 @@ SsaoRender::SsaoRender(DeferredGraphics* d_graphic,
 		indices.size(),
 		D3D11_BIND_INDEX_BUFFER
 	);
-	this->blend_state = make_shared<BlendState>(device);
 	this->view_port.TopLeftX = 0.0f;
 	this->view_port.TopLeftY = 0.0f;
 	this->view_port.Width = width / 2;
@@ -173,11 +172,6 @@ void SsaoRender::setPipe()
 		0,
 		1,
 		this->sampler_state->getComPtr().GetAddressOf()
-	);
-	context->OMSetBlendState(
-		this->blend_state->getComPtr().Get(),
-		this->blend_state->getBlendFactor(),
-		this->blend_state->getSampleMask()
 	);
 	ConstantBuffer cbuffer(
 		this->d_graphic->getDevice(),

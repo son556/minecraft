@@ -74,6 +74,7 @@ void GeoRender::render(
 	vec3 const& cam_pos
 )
 {
+	this->d_graphic->renderBegin(this->d_buffer.get());
 	this->setPipe();
 	ComPtr<ID3D11DeviceContext> context = this->d_graphic->getContext();
 	MVP mvp;
@@ -97,7 +98,6 @@ void GeoRender::render(
 	);
 	context->PSSetConstantBuffers(0, 1, 
 		cpbuffer.getComPtr().GetAddressOf());
-	this->d_graphic->renderBegin(this->d_buffer.get());
 	for (int i = 0; i < this->m_info->size_h; i++) {
 		for (int j = 0; j < this->m_info->size_w; j++) {
 			if (this->m_info->chunks[i][j]->render_flag == false)

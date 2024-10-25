@@ -8,6 +8,7 @@
 #include "InputLayout.h"
 #include "Buffer.h"
 #include "SamplerState.h"
+#include "CubeMap.h"
 
 
 DeferredRendering::DeferredRendering(
@@ -20,6 +21,8 @@ DeferredRendering::DeferredRendering(
 	ssao_blur(defer_graphic, minfo->width, minfo->height)
 {
 	this->d_graphic = defer_graphic;
+	this->cube_map = make_shared<CubeMap>(this->d_graphic,
+		this->m_info->width, this->m_info->height);
 	ComPtr<ID3D11Device> device = this->d_graphic->getDevice();
 	this->vertex_shader = make_shared<VertexShader>(
 		device,
@@ -180,15 +183,20 @@ void DeferredRendering::Render(
 	// ssao blur start
 	this->ssaoBlur(4, cam_proj);
 	
+	// cube map start
+	this->cube_map->render(cam_view, cam_proj, cam_pos);
+	
 	// result render start
+	this->d_graphic->renderBegin();
 	this->setPipe();
 	this->d_graphic->setViewPort(this->view_port);
 	context->PSSetShaderResources(0, 1,
 		this->g_render.getSRV(0).GetAddressOf());
 	context->PSSetShaderResources(1, 1,
 		this->s_render.getSRV().GetAddressOf());
-	this->d_graphic->renderBegin();
 	context->PSSetShaderResources(2, 1, this->ssao_blur.getHeightSRV().GetAddressOf());
+	context->PSSetShaderResources(3, 1,
+		this->cube_map->getSRV().GetAddressOf());
 	context->DrawIndexed(
 		this->ibuffer->getCount(),
 		0, 0);
