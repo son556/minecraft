@@ -2,7 +2,6 @@
 
 #include "WorldUtils.h"
 #include "BlendState.h"
-#include "InputLayouts.h"
 
 class MapUtils;
 class DeferredGraphics;
@@ -38,7 +37,6 @@ private:
 	vec4 mOffsets[14];
 	ComPtr<ID3D11ShaderResourceView> random_vec_SRV;
 	D3D11_VIEWPORT view_port = { 0, };
-	InputLayouts layout;
 	shared_ptr<DeferredBuffer> d_buffer;
 	shared_ptr<RasterizerState> rasterizer_state;
 	shared_ptr<SamplerState> sampler_state;

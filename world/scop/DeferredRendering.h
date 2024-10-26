@@ -46,7 +46,6 @@ private:
 	shared_ptr<CubeMap> cube_map;
 
 private:
-	InputLayouts layout;
 	D3D11_VIEWPORT view_port;
 	shared_ptr<VertexShader> vertex_shader;
 	shared_ptr<PixelShader> pixel_shader;

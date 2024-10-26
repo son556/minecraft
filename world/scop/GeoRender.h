@@ -1,7 +1,5 @@
 #pragma once
 
-#include "InputLayouts.h"
-
 class MapUtils;
 class DeferredGraphics;
 class BlendState; // 바뀔 수 있음 나중에(ex OIT)
@@ -33,7 +31,6 @@ private:
 
 private:
 	MapUtils* m_info;
-	InputLayouts layout;
 	DeferredGraphics* d_graphic;
 	shared_ptr<DeferredBuffer> d_buffer;
 	shared_ptr<RasterizerState> rasterizer_state;

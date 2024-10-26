@@ -6,6 +6,7 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "InputLayout.h"
+#include "InputLayouts.h"
 #include "Buffer.h"
 #include "SamplerState.h"
 #include "CubeMap.h"
@@ -38,8 +39,8 @@ DeferredRendering::DeferredRendering(
 	);
 	this->input_layout = make_shared<InputLayout>(
 		device,
-		this->layout.layout_deferred.data(),
-		this->layout.layout_deferred.size(),
+		InputLayouts::layout_deferred.data(),
+		InputLayouts::layout_deferred.size(),
 		this->vertex_shader->getBlob()
 	);
 	this->rasterizer_state = make_shared<RasterizerState>(

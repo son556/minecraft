@@ -9,6 +9,7 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "InputLayout.h"
+#include "InputLayouts.h"
 #include "ConstantBuffer.h"
 #include "Chunk.h"
 
@@ -33,9 +34,9 @@ GeoRender::GeoRender(
 		D3D11_CULL_BACK
 	);
 	vector<wstring> path_arr = {
-		L"grass_top.png",
-		L"grass_bottom.png",
-		L"grass_side.png"
+		L"./textures/blocks/grass_top.png",
+		L"./textures/blocks/grass_bottom.png",
+		L"./textures/blocks/grass_side.png"
 	};
 	this->texture_array = make_shared<TextureArray>(
 		device,
@@ -58,8 +59,8 @@ GeoRender::GeoRender(
 	);
 	this->input_layout = make_shared<InputLayout>(
 		device,
-		layout.layout_Geo.data(),
-		layout.layout_Geo.size(),
+		InputLayouts::layout_Geo.data(),
+		InputLayouts::layout_Geo.size(),
 		this->vertex_shader->getBlob()
 	);
 }
@@ -108,7 +109,6 @@ void GeoRender::render(
 			);
 		}
 	}
-	this->d_graphic->getContext()->Flush();
 }
 
 ComPtr<ID3D11ShaderResourceView> GeoRender::getSRV(int idx)

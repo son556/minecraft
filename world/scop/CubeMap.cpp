@@ -32,11 +32,10 @@ CubeMap::CubeMap(
 		"main",
 		"vs_5_0"
 	);
-	InputLayouts layout;
 	this->input_layout = make_shared<InputLayout>(
 		device,
-		layout.layout_deferred.data(),
-		layout.layout_deferred.size(),
+		InputLayouts::layout_deferred.data(),
+		InputLayouts::layout_deferred.size(),
 		this->vertex_shader->getBlob()
 	);
 	this->rasterizer_state = make_shared<RasterizerState>(
@@ -60,6 +59,7 @@ void CubeMap::render(
 	vec3 const& cam_pos
 )
 {
+	this->d_graphic->renderBegin(this->d_buffer.get());
 	vector<VertexDefer> vertices;
 	vector<uint32> indices;
 	Block::makeCubeMap(
@@ -81,7 +81,6 @@ void CubeMap::render(
 		D3D11_BIND_INDEX_BUFFER
 	);
 	this->setPipe();
-	this->d_graphic->renderBegin(this->d_buffer.get());
 	ComPtr<ID3D11DeviceContext> context = 
 		this->d_graphic->getContext();
 	ComPtr<ID3D11Device> device = this->d_graphic->getDevice();
@@ -94,7 +93,6 @@ void CubeMap::render(
 	context->VSSetConstantBuffers(0, 1,
 		cbuffer.getComPtr().GetAddressOf());
 	context->DrawIndexed(this->ibuffer->getCount(), 0, 0);
-	context->Flush();
 }
 
 ComPtr<ID3D11ShaderResourceView> CubeMap::getSRV()
@@ -144,7 +142,7 @@ void CubeMap::makeCubeSRV()
 	ComPtr<ID3D11Texture2D> texture;
 	HRESULT hr = CreateDDSTextureFromFileEx(
 		device.Get(),
-		L"skybox_sample.dds",
+		L"./textures/skybox/skybox_sample.dds",
 		0,
 		D3D11_USAGE_DEFAULT, 
 		D3D11_BIND_SHADER_RESOURCE,

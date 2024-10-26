@@ -160,6 +160,18 @@
     <Filter Include="소스 파일\World\Map\System\RenderSystem\cubemap">
       <UniqueIdentifier>{a7973095-e4cd-42b1-8aad-66b44c0ef85e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\SunMoon">
+      <UniqueIdentifier>{f3759840-a3d6-410e-81b8-201f76e06ee7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\SunMoon\Sun">
+      <UniqueIdentifier>{61e1663b-8c1a-41b4-9d26-ada09a42569b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\SunMoon\Moon">
+      <UniqueIdentifier>{7b2df57c-a174-4ee7-bbdf-e4a5975b6a83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon">
+      <UniqueIdentifier>{84673491-15b9-4f7f-971a-256c0027b4a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -288,6 +300,15 @@
     <ClInclude Include="CubeMap.h">
       <Filter>소스 파일\World\Map\System\RenderSystem\cubemap</Filter>
     </ClInclude>
+    <ClInclude Include="Sun.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Sun</Filter>
+    </ClInclude>
+    <ClInclude Include="SunMoon.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon</Filter>
+    </ClInclude>
+    <ClInclude Include="Moon.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Moon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -407,6 +428,15 @@
     <ClCompile Include="CubeMap.cpp">
       <Filter>소스 파일\World\Map\System\RenderSystem\cubemap</Filter>
     </ClCompile>
+    <ClCompile Include="Sun.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Sun</Filter>
+    </ClCompile>
+    <ClCompile Include="SunMoon.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon</Filter>
+    </ClCompile>
+    <ClCompile Include="Moon.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Moon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scop.rc">
@@ -499,6 +529,12 @@
     </FxCompile>
     <FxCompile Include="SkyBoxPS.hlsl">
       <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox</Filter>
+    </FxCompile>
+    <FxCompile Include="SunMoonVS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
+    </FxCompile>
+    <FxCompile Include="SunMoonPS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
