@@ -52,21 +52,16 @@ void SunMoon::render(
 	device = this->d_graphic->getDevice();
 	ComPtr<ID3D11DeviceContext> context;
 	context = this->d_graphic->getContext();
-	float dt = 60;
+	float dt = XMConvertToRadians(15);
 	MVP mvp;
-	mvp.model = XMMatrixRotationZ(dt) * 
-		XMMatrixTranslation(0, 0, cam_pos.z);
-	XMFLOAT4 s_pos = XMFLOAT4(299, 0, 0, 1);
+	vec3 move_pos = vec3(cam_pos.x + 299, 0, cam_pos.z);
+	mvp.model = SimpleMath::Matrix::CreateTranslation(move_pos) * 
+		SimpleMath::Matrix::CreateRotationZ(dt);
+	XMFLOAT4 s_pos = XMFLOAT4(0, 0, 0, 1);
 	XMVECTOR sun_pos_vec = XMLoadFloat4(&s_pos);
 	sun_pos_vec = XMVector4Transform(sun_pos_vec, mvp.model);
 	XMStoreFloat4(&s_pos, sun_pos_vec);
 	this->sun_pos = vec3(s_pos.x, s_pos.y, s_pos.z);
-	
-	XMFLOAT4 m_pos = XMFLOAT4(-299, 0, 0, 1);
-	XMVECTOR moon_pos_vec = XMLoadFloat4(&m_pos);
-	moon_pos_vec = XMVector4Transform(moon_pos_vec, mvp.model);
-	XMStoreFloat4(&m_pos, moon_pos_vec);
-	this->moon_pos = vec3(m_pos.x, m_pos.y, m_pos.z);
 
 	mvp.model = mvp.model.Transpose();
 	mvp.view = cam_view.Transpose();
@@ -89,6 +84,17 @@ void SunMoon::render(
 		0, 0);
 	
 	//moon
+	move_pos = vec3(cam_pos.x - 299, 0, cam_pos.z);
+	mvp.model = SimpleMath::Matrix::CreateTranslation(move_pos) *
+		SimpleMath::Matrix::CreateRotationZ(dt);
+	XMFLOAT4 m_pos = XMFLOAT4(0, 0, 0, 1);
+	XMVECTOR moon_pos_vec = XMLoadFloat4(&m_pos);
+	moon_pos_vec = XMVector4Transform(moon_pos_vec, mvp.model);
+	XMStoreFloat4(&m_pos, moon_pos_vec);
+	this->moon_pos = vec3(m_pos.x, m_pos.y, m_pos.z);
+	mvp.model = mvp.model.Transpose();
+	cbuffer.update(mvp);
+
 	offset = this->moon->getVertexBffer()->getOffset();
 	stride = this->moon->getVertexBffer()->getStride();
 	context->IASetVertexBuffers(0, 1,

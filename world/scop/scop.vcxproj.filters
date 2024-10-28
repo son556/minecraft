@@ -172,6 +172,12 @@
     <Filter Include="소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon">
       <UniqueIdentifier>{84673491-15b9-4f7f-971a-256c0027b4a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\World\Map\System\RenderSystem\SunMoon\Blur">
+      <UniqueIdentifier>{a73a7cb9-6374-4627-875f-1cf9dcc2aa93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Engine\Pipeline\3_Shader\ComputeShader">
+      <UniqueIdentifier>{837fc306-591b-4d32-8205-e8d14a4a333d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -309,6 +315,12 @@
     <ClInclude Include="Moon.h">
       <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Moon</Filter>
     </ClInclude>
+    <ClInclude Include="Blur.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Blur</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeShader.h">
+      <Filter>소스 파일\Engine\Pipeline\3_Shader\ComputeShader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -437,6 +449,12 @@
     <ClCompile Include="Moon.cpp">
       <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Moon</Filter>
     </ClCompile>
+    <ClCompile Include="Blur.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Blur</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeShader.cpp">
+      <Filter>소스 파일\Engine\Pipeline\3_Shader\ComputeShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scop.rc">
@@ -534,6 +552,9 @@
       <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
     </FxCompile>
     <FxCompile Include="SunMoonPS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
+    </FxCompile>
+    <FxCompile Include="BlurCS.hlsl">
       <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
     </FxCompile>
   </ItemGroup>

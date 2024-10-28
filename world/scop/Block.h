@@ -214,7 +214,6 @@ namespace Block {
 	}
 
 	inline void makeCubeMap(
-		vec3 const& center_pos,
 		float const& scale,
 		vector<VertexDefer>& vertices,
 		vector<uint32>& indices

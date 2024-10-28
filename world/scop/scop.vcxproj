@@ -149,6 +149,8 @@
   <ItemGroup>
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="Blur.h" />
+    <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="CubeMap.h" />
     <ClInclude Include="DeferredGraphics.h" />
     <ClInclude Include="DeferredRendering.h" />
@@ -196,6 +198,8 @@
   <ItemGroup>
     <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Blur.cpp" />
+    <ClCompile Include="ComputeShader.cpp" />
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="DeferredGraphics.cpp" />
     <ClCompile Include="DeferredRendering.cpp" />
@@ -252,6 +256,16 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="BlurCS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="DeferredPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

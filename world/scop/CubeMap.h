@@ -10,6 +10,7 @@ class PixelShader;
 class InputLayout;
 class RasterizerState;
 class DeferredBuffer;
+class SunMoon;
 
 class CubeMap
 {
@@ -29,6 +30,7 @@ private:
 	DeferredGraphics* d_graphic;
 	UINT width;
 	UINT height;
+	shared_ptr<SunMoon> sun_moon;
 	shared_ptr<DeferredBuffer> d_buffer;
 	shared_ptr<VertexShader> vertex_shader;
 	shared_ptr<SamplerState> sampler_state;

@@ -10,13 +10,13 @@ Sun::Sun(DeferredGraphics* dgraphic, UINT radius)
 	vector<uint32> indices;
 	vector<VertexColor> vertices;
 
-	positions.push_back(vec3(-1.0f, -1.0f, 1.0f) * radius);
-	positions.push_back(vec3(-1.0f, 1.0f, 1.0f) * radius);
-	positions.push_back(vec3(-1.0f, 1.0f, -1.0f) * radius);
-	positions.push_back(vec3(-1.0f, -1.0f, -1.0f) * radius);
+	positions.push_back(vec3(0.0f, -1.0f, 1.0f) * radius);
+	positions.push_back(vec3(0.0f, 1.0f, 1.0f) * radius);
+	positions.push_back(vec3(0.0f, 1.0f, -1.0f) * radius);
+	positions.push_back(vec3(0.0f, -1.0f, -1.0f) * radius);
 	VertexColor vertex;
 	for (int i = 0; i < 4; i++) {
-		vertex.pos = vec3(299, 0, 0) + positions[i];
+		vertex.pos = positions[i];
 		vertex.col = color(1.0f, 1.0f, 1.0f, 1.0f);
 		vertices.push_back(vertex);
 	}
