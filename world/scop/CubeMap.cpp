@@ -25,7 +25,7 @@ CubeMap::CubeMap(
 	this->width = width;
 	this->height = height;
 	ComPtr<ID3D11Device> device = this->d_graphic->getDevice();
-	this->sun_moon = make_shared<SunMoon>(this->d_graphic);
+	this->sun_moon = make_shared<SunMoon>(this->d_graphic, width, height);
 	this->d_buffer = make_shared<DeferredBuffer>(1);
 	this->d_buffer->setRTVsAndSRVs(device, width, height);
 	this->vertex_shader = make_shared<VertexShader>(
@@ -62,7 +62,7 @@ void CubeMap::render(
 )
 {
 	this->d_graphic->renderBegin(this->d_buffer.get());
-	this->sun_moon->render(cam_pos, cam_view, cam_proj);
+	this->sun_moon->render(cam_pos, cam_view, cam_proj, this->d_buffer.get());
 	vector<VertexDefer> vertices;
 	vector<uint32> indices;
 	Block::makeCubeMap(

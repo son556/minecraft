@@ -2,7 +2,6 @@
 
 #include "WorldUtils.h"
 
-template<typename T> class Buffer;
 class DeferredGraphics;
 class VertexShader;
 class SamplerState;
@@ -11,6 +10,7 @@ class InputLayout;
 class RasterizerState;
 class DeferredBuffer;
 class SunMoon;
+template<typename T> class Buffer;
 
 class CubeMap
 {
@@ -31,6 +31,8 @@ private:
 	UINT width;
 	UINT height;
 	shared_ptr<SunMoon> sun_moon;
+
+private:
 	shared_ptr<DeferredBuffer> d_buffer;
 	shared_ptr<VertexShader> vertex_shader;
 	shared_ptr<SamplerState> sampler_state;

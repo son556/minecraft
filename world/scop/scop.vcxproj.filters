@@ -321,6 +321,9 @@
     <ClInclude Include="ComputeShader.h">
       <Filter>소스 파일\Engine\Pipeline\3_Shader\ComputeShader</Filter>
     </ClInclude>
+    <ClInclude Include="Filter.h">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Blur</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -455,6 +458,9 @@
     <ClCompile Include="ComputeShader.cpp">
       <Filter>소스 파일\Engine\Pipeline\3_Shader\ComputeShader</Filter>
     </ClCompile>
+    <ClCompile Include="Filter.cpp">
+      <Filter>소스 파일\World\Map\System\RenderSystem\SunMoon\Blur</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scop.rc">
@@ -554,7 +560,10 @@
     <FxCompile Include="SunMoonPS.hlsl">
       <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
     </FxCompile>
-    <FxCompile Include="BlurCS.hlsl">
+    <FxCompile Include="SunMoonBlurVS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
+    </FxCompile>
+    <FxCompile Include="SunMoonBlurPS.hlsl">
       <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon</Filter>
     </FxCompile>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MapUtils.h"
+#include "WorldUtils.h"
 
 class DeferredGraphics;
 template <typename T> class Buffer;

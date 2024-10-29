@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SunMoon.h"
 #include "DeferredGraphics.h"
+#include "DeferredBuffer.h"
 #include "InputLayout.h"
 #include "InputLayouts.h"
 #include "VertexShader.h"
@@ -10,12 +11,18 @@
 #include "Sun.h"
 #include "Moon.h"
 #include "Buffer.h"
+#include "Blur.h"
 
-SunMoon::SunMoon(DeferredGraphics* dgraphic)
+SunMoon::SunMoon(
+	DeferredGraphics* dgraphic,
+	UINT width,
+	UINT height
+)
 {
 	this->d_graphic = dgraphic;
 	this->sun = make_shared<Sun>(dgraphic, 30);
 	this->moon = make_shared<Moon>(dgraphic, 30);
+	this->blur = make_shared<Blur>(dgraphic, width, height);
 	ComPtr<ID3D11Device> device = dgraphic->getDevice();
 	this->vertex_shader = make_shared<VertexShader>(
 		device,
@@ -45,7 +52,8 @@ SunMoon::SunMoon(DeferredGraphics* dgraphic)
 void SunMoon::render(
 	vec3 const& cam_pos,
 	Mat const& cam_view,
-	Mat const& cam_proj
+	Mat const& cam_proj,
+	DeferredBuffer* dbuffer
 )
 {
 	ComPtr<ID3D11Device> device;
@@ -82,8 +90,8 @@ void SunMoon::render(
 		&stride, &offset);
 	context->DrawIndexed(this->sun->getIndexBuffer()->getCount(),
 		0, 0);
-	
-	//moon
+
+	// moon
 	move_pos = vec3(cam_pos.x - 299, 0, cam_pos.z);
 	mvp.model = SimpleMath::Matrix::CreateTranslation(move_pos) *
 		SimpleMath::Matrix::CreateRotationZ(dt);
@@ -102,6 +110,8 @@ void SunMoon::render(
 		&stride, &offset);
 	context->DrawIndexed(this->moon->getIndexBuffer()->getCount(),
 		0, 0);
+
+	//this->blur->render(dbuffer->getSRV(0), 100);
 }
 
 void SunMoon::setPipe()
