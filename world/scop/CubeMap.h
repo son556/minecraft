@@ -9,7 +9,6 @@ class PixelShader;
 class InputLayout;
 class RasterizerState;
 class DeferredBuffer;
-class SunMoon;
 template<typename T> class Buffer;
 
 class CubeMap
@@ -30,7 +29,6 @@ private:
 	DeferredGraphics* d_graphic;
 	UINT width;
 	UINT height;
-	shared_ptr<SunMoon> sun_moon;
 
 private:
 	shared_ptr<DeferredBuffer> d_buffer;

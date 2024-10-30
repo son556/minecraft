@@ -11,7 +11,6 @@
 #include "Sun.h"
 #include "Moon.h"
 #include "Buffer.h"
-#include "Blur.h"
 
 SunMoon::SunMoon(
 	DeferredGraphics* dgraphic,
@@ -22,8 +21,9 @@ SunMoon::SunMoon(
 	this->d_graphic = dgraphic;
 	this->sun = make_shared<Sun>(dgraphic, 30);
 	this->moon = make_shared<Moon>(dgraphic, 30);
-	this->blur = make_shared<Blur>(dgraphic, width, height);
+	this->d_buffer = make_shared<DeferredBuffer>(1);
 	ComPtr<ID3D11Device> device = dgraphic->getDevice();
+	this->d_buffer->setRTVsAndSRVs(device, width, height);
 	this->vertex_shader = make_shared<VertexShader>(
 		device,
 		L"SunMoonVS.hlsl",
@@ -52,8 +52,7 @@ SunMoon::SunMoon(
 void SunMoon::render(
 	vec3 const& cam_pos,
 	Mat const& cam_view,
-	Mat const& cam_proj,
-	DeferredBuffer* dbuffer
+	Mat const& cam_proj
 )
 {
 	ComPtr<ID3D11Device> device;
@@ -82,6 +81,8 @@ void SunMoon::render(
 	this->setPipe();
 	context->VSSetConstantBuffers(0, 1,
 		cbuffer.getComPtr().GetAddressOf());
+
+	this->d_graphic->renderBegin(this->d_buffer.get());
 	// sun
 	uint32 offset = this->sun->getVertexBuffer()->getOffset();
 	uint32 stride = this->sun->getVertexBuffer()->getStride();
@@ -110,8 +111,11 @@ void SunMoon::render(
 		&stride, &offset);
 	context->DrawIndexed(this->moon->getIndexBuffer()->getCount(),
 		0, 0);
+}
 
-	//this->blur->render(dbuffer->getSRV(0), 100);
+ComPtr<ID3D11ShaderResourceView> SunMoon::getSRV()
+{
+	return this->d_buffer->getSRV(0);
 }
 
 void SunMoon::setPipe()

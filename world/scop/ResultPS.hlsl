@@ -11,13 +11,6 @@ Texture2D cube_map : register(t3);
 
 SamplerState sampler0 : register(s0);
 
-float2 ndcToTextureUV(float2 ndc)
-{
-    float2 uv;
-    uv.x = (ndc.x + 1.0f) * 0.5f;
-    uv.y = (-ndc.y + 1.0f) * 0.5f;
-    return uv;
-}
 
 float4 main(PS_INPUT input) : SV_TARGET
 {

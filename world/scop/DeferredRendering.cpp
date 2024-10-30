@@ -9,7 +9,8 @@
 #include "InputLayouts.h"
 #include "Buffer.h"
 #include "SamplerState.h"
-#include "CubeMap.h"
+#include "Wallpaper.h"
+#include "Block.h"
 
 
 DeferredRendering::DeferredRendering(
@@ -22,7 +23,7 @@ DeferredRendering::DeferredRendering(
 	ssao_blur(defer_graphic, minfo->width, minfo->height)
 {
 	this->d_graphic = defer_graphic;
-	this->cube_map = make_shared<CubeMap>(this->d_graphic,
+	this->cube_map = make_shared<Wallpaper>(this->d_graphic,
 		this->m_info->width, this->m_info->height);
 	ComPtr<ID3D11Device> device = this->d_graphic->getDevice();
 	this->vertex_shader = make_shared<VertexShader>(
@@ -49,33 +50,9 @@ DeferredRendering::DeferredRendering(
 		D3D11_CULL_BACK
 	);
 	this->sampler_state = make_shared<SamplerState>(device);
-	vector<vec3> sample_pos = {
-		// front
-		{-1.f, -1.f, 0.f},
-		{-1.f, +1.f, 0.f},
-		{+1.f, +1.f, 0.f},
-		{+1.f, -1.f, 0.f},
-	};
-	vector<vec2> sample_uv = {
-		{0.f, 1.f},
-		{0.f, 0.f},
-		{1.f, 0.f},
-		{1.f, 1.f},
-	};
 	vector<VertexDefer> vertices;
 	vector<uint32> indices;
-	VertexDefer v_deff;
-	for (int i = 0; i < 4; i++) {
-		v_deff.pos = sample_pos[i];
-		v_deff.uv = sample_uv[i];
-		vertices.push_back(v_deff);
-	}
-	indices.push_back(0);
-	indices.push_back(1);
-	indices.push_back(2);
-	indices.push_back(0);
-	indices.push_back(2);
-	indices.push_back(3);
+	Block::makeBox(1, vertices, indices);
 	this->vbuffer = make_shared<Buffer<VertexDefer>>(
 		device,
 		vertices.data(),
@@ -185,7 +162,7 @@ void DeferredRendering::Render(
 	this->ssaoBlur(4, cam_proj);
 	
 	// cube map start
-	this->cube_map->render(cam_view, cam_proj, cam_pos);
+	this->cube_map->render(cam_pos, cam_view, cam_proj);
 	
 	// result render start
 	this->d_graphic->renderBegin();

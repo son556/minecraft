@@ -10,7 +10,7 @@
 class DeferredGraphics;
 class MapUtils;
 template <typename T> class Buffer;
-class CubeMap;
+class Wallpaper;
 
 class DeferredRendering
 {
@@ -43,7 +43,7 @@ private:
 	GeoRender g_render;
 	SsaoRender ssao_render;
 	SsaoBlur ssao_blur;
-	shared_ptr<CubeMap> cube_map;
+	shared_ptr<Wallpaper> cube_map;
 
 private:
 	D3D11_VIEWPORT view_port;

@@ -2,46 +2,47 @@
 
 #include "Block.h"
 
+class CubeMap;
+class ResultSM;
 class DeferredGraphics;
 class DeferredBuffer;
-class PixelShader;
 class VertexShader;
-class InputLayout;
-template<typename T> class Buffer;
-class SamplerState;
 class RasterizerState;
+class PixelShader;
+class InputLayout;
+class SamplerState;
+template<typename T> class Buffer;
 
-class Filter
+class Wallpaper
 {
 public:
-	Filter(
-		DeferredGraphics* dgraphic,
-		UINT width,
-		UINT height,
-		wstring const& vs_path,
-		wstring const& ps_path
+	Wallpaper(DeferredGraphics* graphic,
+		UINT width, UINT height);
+	void render(
+		vec3 const& cam_pos,
+		Mat const& cam_view,
+		Mat const& cam_proj
 	);
-	~Filter();
-	void render();
 	ComPtr<ID3D11ShaderResourceView> getSRV();
-	void setStartSRV(ComPtr<ID3D11ShaderResourceView> srv);
 
 private:
 	void setPipe();
+
+private:
+	shared_ptr<CubeMap> cube_map;
+	shared_ptr<ResultSM> sun_moon;
 	shared_ptr<Buffer<VertexDefer>> vbuffer;
 	shared_ptr<Buffer<uint32>> ibuffer;
 
 private:
-	DeferredGraphics* d_graphic = nullptr;
+	DeferredGraphics* d_graphic;
+	UINT width;
+	UINT height;
 	shared_ptr<DeferredBuffer> d_buffer;
-	D3D11_VIEWPORT view_port = { 0, };
 	shared_ptr<InputLayout> input_layout;
-	shared_ptr<VertexShader> vertex_shader;
+	shared_ptr<VertexShader> verex_shader;
 	shared_ptr<RasterizerState> rasterizer_state;
 	shared_ptr<PixelShader> pixel_shader;
 	shared_ptr<SamplerState> sampler_state;
-
-private:
-	ID3D11ShaderResourceView* in_srv;
 };
 

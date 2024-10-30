@@ -10,7 +10,11 @@ struct PS_INPUT
     float2 uv : TEXCOORD;
 };
 
-float4 main( float4 pos : POSITION ) : SV_POSITION
+
+PS_INPUT main( VS_INPUT input )
 {
-	return pos;
+    PS_INPUT output;
+    output.pos = float4(input.pos, 1);
+    output.uv = input.uv;
+    return output;
 }
