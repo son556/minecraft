@@ -10,9 +10,8 @@ SamplerState sampler0 : register(s0);
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-	float4 color;
-    color = sun_moon.Sample(sampler0, input.uv);
-    if (color.r + color.g + color.b < 1)
-        color += skybox.Sample(sampler0, input.uv);
-    return color;
+	float3 color;
+    color = sun_moon.Sample(sampler0, input.uv).rgb;
+    color += skybox.Sample(sampler0, input.uv).rgb;
+    return float4(color, 1);
 }

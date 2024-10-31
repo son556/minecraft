@@ -21,6 +21,7 @@ private:
 private:
 	vector<shared_ptr<Filter>> down_filter;
 	vector<shared_ptr<Filter>> up_blur_x_filter;
+	vector<shared_ptr<Filter>> tmp_up_filter;
 	vector<shared_ptr<Filter>> up_blur_y_filter;
 	shared_ptr<Filter> final_filter;
 private:
