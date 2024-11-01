@@ -30,7 +30,8 @@ GeoRender::GeoRender(
 	ComPtr<ID3D11DeviceContext> context = this->d_graphic->getContext();
 	this->rasterizer_state = make_shared<RasterizerState>(
 		device,
-		D3D11_FILL_SOLID,
+		//D3D11_FILL_SOLID,
+		D3D11_FILL_WIREFRAME,
 		D3D11_CULL_BACK
 	);
 	vector<wstring> path_arr = {

@@ -10,6 +10,8 @@ class PixelShader;
 class InputLayout;
 class RasterizerState;
 class DeferredBuffer;
+class HullShader;
+class DomainShader;
 
 class GeoRender
 {

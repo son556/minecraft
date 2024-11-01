@@ -43,7 +43,7 @@ ResultSM::ResultSM(
 	);
 	this->vertex_sahder = make_shared<VertexShader>(
 		device,
-		L"TestCombineVS.hlsl",
+		L"SemiCombineVS.hlsl",
 		"main",
 		"vs_5_0"
 	);
@@ -54,7 +54,7 @@ ResultSM::ResultSM(
 	);
 	this->pixel_shader = make_shared<PixelShader>(
 		device,
-		L"TestCombinePS.hlsl",
+		L"SemiCombinePS.hlsl",
 		"main",
 		"ps_5_0"
 	);

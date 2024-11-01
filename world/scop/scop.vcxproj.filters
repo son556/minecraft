@@ -193,6 +193,15 @@
     <Filter Include="소스 파일\World\Map\System\RenderSystem\Wallpaper\SunMoon\Object\Sun">
       <UniqueIdentifier>{61e1663b-8c1a-41b4-9d26-ada09a42569b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon\SemiCombine">
+      <UniqueIdentifier>{2b02307e-1773-4c63-a3bc-e527da3ea666}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Engine\Pipeline\3_Shader\HullShader">
+      <UniqueIdentifier>{0a7d9432-e6dc-4211-9999-329abd7aba9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Engine\Pipeline\3_Shader\DomainShader">
+      <UniqueIdentifier>{06808725-e567-49bd-a468-fa57e9452d13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -345,6 +354,12 @@
     <ClInclude Include="Wallpaper.h">
       <Filter>소스 파일\World\Map\System\RenderSystem\Wallpaper</Filter>
     </ClInclude>
+    <ClInclude Include="HullShader.h">
+      <Filter>소스 파일\Engine\Pipeline\3_Shader\HullShader</Filter>
+    </ClInclude>
+    <ClInclude Include="DomainShader.h">
+      <Filter>소스 파일\Engine\Pipeline\3_Shader\DomainShader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -488,6 +503,12 @@
     <ClCompile Include="Wallpaper.cpp">
       <Filter>소스 파일\World\Map\System\RenderSystem\Wallpaper</Filter>
     </ClCompile>
+    <ClCompile Include="HullShader.cpp">
+      <Filter>소스 파일\Engine\Pipeline\3_Shader\HullShader</Filter>
+    </ClCompile>
+    <ClCompile Include="DomainShader.cpp">
+      <Filter>소스 파일\Engine\Pipeline\3_Shader\DomainShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="scop.rc">
@@ -605,11 +626,17 @@
     <FxCompile Include="SunMoonVS.hlsl">
       <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon\Object</Filter>
     </FxCompile>
-    <FxCompile Include="TestCombineVS.hlsl">
-      <Filter>소스 파일\World\WorldShaderFIle\TestShader</Filter>
+    <FxCompile Include="SemiCombinePS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon\SemiCombine</Filter>
     </FxCompile>
-    <FxCompile Include="TestCombinePS.hlsl">
-      <Filter>소스 파일\World\WorldShaderFIle\TestShader</Filter>
+    <FxCompile Include="SemiCombineVS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\SkyBox\SunMoon\SemiCombine</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryHS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\Geometry</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryDS.hlsl">
+      <Filter>소스 파일\World\WorldShaderFIle\DefferedShader\Geometry</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
