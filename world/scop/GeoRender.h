@@ -41,5 +41,7 @@ private:
 	shared_ptr<VertexShader> vertex_shader;
 	shared_ptr<PixelShader> pixel_shader;
 	shared_ptr<InputLayout> input_layout;
+	shared_ptr<HullShader> hull_shader;
+	shared_ptr<DomainShader> domain_shader;
 };
 

@@ -1,31 +1,57 @@
-struct DS_OUTPUT
+cbuffer MVP : register(b0)
 {
-	float4 vPosition  : SV_POSITION;
+    matrix world;
+    matrix view;
+    matrix proj;
 };
 
-struct HS_CONTROL_POINT_OUTPUT
+struct DS_INPUT
 {
-	float3 vPosition : WORLDPOS; 
+    int type : TYPE;
+    float4 pos : SV_Position;
+    float3 normal : NORMAL;
+    float3 world_pos : POSITION;
+    float2 uv : TEXCOORD;
+    int dir : DIRECTION;
 };
 
-struct HS_CONSTANT_DATA_OUTPUT
+struct PS_INPUT
 {
-	float EdgeTessFactor[3]			: SV_TessFactor;
-	float InsideTessFactor			: SV_InsideTessFactor;
+    int type : TYPE;
+    float4 pos : SV_Position;
+    float3 normal : NORMAL;
+    float3 world_pos : POSITION;
+    float2 uv : TEXCOORD;
+    int dir : DIRECTION;
+};
+
+struct PatchConstOutput
+{
+    float edges[3] : SV_TessFactor;
+    float inside : SV_InsideTessFactor;
 };
 
 #define NUM_CONTROL_POINTS 3
 
 [domain("tri")]
-DS_OUTPUT main(
-	HS_CONSTANT_DATA_OUTPUT input,
-	float3 domain : SV_DomainLocation,
-	const OutputPatch<HS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> patch)
+PS_INPUT main(
+	PatchConstOutput input,
+	float3 uvw : SV_DomainLocation,
+	const OutputPatch<DS_INPUT, NUM_CONTROL_POINTS> patch)
 {
-	DS_OUTPUT Output;
+	PS_INPUT output;
 
-	Output.vPosition = float4(
-		patch[0].vPosition*domain.x+patch[1].vPosition*domain.y+patch[2].vPosition*domain.z,1);
-
-	return Output;
+    float3 position;
+    position = uvw.x * patch[0].pos.xyz + uvw.y * patch[1].pos.xyz 
+        + patch[2].pos.xyz * uvw.z;
+    output.pos = float4(position, 1);
+    output.pos = mul(output.pos, view);
+    output.pos = mul(output.pos, proj);
+    output.dir = patch[0].dir;
+    output.normal = patch[0].normal;
+    output.world_pos = position;
+    output.type = patch[0].type;
+    output.uv = uvw.x * patch[0].uv + uvw.y * patch[1].uv +
+        uvw.z * patch[2].uv;
+    return output;
 }
