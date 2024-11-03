@@ -103,6 +103,113 @@ namespace Block {
 		}
 	}
 
+	inline void addFaceQuadPosAndTex(
+		vec3 const& start_pos,
+		int dir,
+		float x,
+		float y,
+		float z,
+		int type,
+		vector<VertexGeo>& vertices
+	)
+	{
+		static vector<vec3> pos = {
+			//top
+			{-0.5f, +0.5f, +0.5f},
+			{+0.5f, +0.5f, +0.5f},
+			{-0.5f, +0.5f, -0.5f},
+			{+0.5f, +0.5f, -0.5f},
+
+			//bottom
+			{-0.5f, -0.5f, +0.5f},
+			{-0.5f, -0.5f, -0.5f},
+			{+0.5f, -0.5f, +0.5f},
+			{+0.5f, -0.5f, -0.5f},
+
+			// front
+			{-0.5f, +0.5f, -0.5f},
+			{+0.5f, +0.5f, -0.5f},
+			{-0.5f, -0.5f, -0.5f},
+			{+0.5f, -0.5f, -0.5f},
+
+			// back
+			{-0.5f, +0.5f, +0.5f},
+			{-0.5f, -0.5f, +0.5f},
+			{+0.5f, +0.5f, +0.5f},
+			{+0.5f, -0.5f, +0.5f},
+
+			// left
+			{-0.5f, +0.5f, +0.5f},
+			{-0.5f, +0.5f, -0.5f},
+			{-0.5f, -0.5f, +0.5f},
+			{-0.5f, -0.5f, -0.5f},
+
+			//right
+			{+0.5f, +0.5f, -0.5f},
+			{+0.5f, +0.5f, +0.5f},
+			{+0.5f, -0.5f, -0.5f},
+			{+0.5f, -0.5f, +0.5f},
+		};
+
+		static vector<vec2> uv = {
+			//top
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
+
+			//bottom
+			{0.f, 1.f},
+			{0.f, 0.f},
+			{1.f, 1.f},
+			{1.f, 0.f},
+
+			//front
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
+
+			//back
+			{0.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 0.f},
+			{1.f, 1.f},
+
+			//left
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
+
+			//right
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f}
+		};
+		static vector<vec3> normals = {
+			{0, 1, 0},
+			{0, -1, 0},
+			{0, 0, -1},
+			{0, 0, 1},
+			{-1, 0, 0},
+			{1, 0, 0}
+		};
+		VertexGeo vertex;
+		x = start_pos.x + x;
+		y = start_pos.y + y;
+		z = start_pos.z - z;
+		for (int i = dir * 4; i < dir * 4 + 4; i++) {
+			vertex.pos = pos[i] + vec3(x, y, z);
+			vertex.normal = normals[dir];
+			vertex.uv = uv[i];
+			vertex.type = type;
+			vertex.dir = dir;
+			vertices.push_back(vertex);
+		}
+	}
+
 	inline void addBlockFacePosAndTex(
 		vec3 const& start_pos,
 		float x,

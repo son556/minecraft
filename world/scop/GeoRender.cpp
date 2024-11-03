@@ -139,12 +139,8 @@ void GeoRender::setPipe()
 {
 	ComPtr<ID3D11DeviceContext> context = 
 		this->d_graphic->getContext();
-	/*context->IASetPrimitiveTopology(
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-	);*/
 	context->IASetPrimitiveTopology(
-		D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST
-	);
+		D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 	context->IASetInputLayout(this->input_layout->getComPtr().Get());
 	context->VSSetShader(
 		this->vertex_shader->getComPtr().Get(),

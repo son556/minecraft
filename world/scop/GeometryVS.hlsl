@@ -10,9 +10,9 @@ struct VS_INPUT
 struct HS_INPUT
 {
     int type : TYPE;
-    float4 pos : SV_Position;
+    float4 pos : POSITION;
     float3 normal : NORMAL;
-    float3 world_pos : POSITION;
+    float3 world_pos : POSITION_WORLD;
     float2 uv : TEXCOORD;
     int dir : DIRECTION;
 };
