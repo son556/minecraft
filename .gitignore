@@ -197,5 +197,6 @@ _Pvt_Extensions
 *.pch
 *.cso
 *.exe
+*.png
 **/Binaries/
 **/bedrock-samples-main/
