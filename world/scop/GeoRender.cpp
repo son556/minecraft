@@ -5,6 +5,7 @@
 #include "MapUtils.h"
 #include "RasterizerState.h"
 #include "TextureArray.h"
+#include "Texture.h"
 #include "SamplerState.h"
 #include "VertexShader.h"
 #include "PixelShader.h"
@@ -41,6 +42,10 @@ GeoRender::GeoRender(
 		L"./textures/blocks/grass_bottom.png",
 		L"./textures/blocks/grass_side.png"
 	};
+	
+	Texture test(device, context,
+		"./textures/pbr/grass_top/grass_basecolor.png", 0);
+
 	this->texture_array = make_shared<TextureArray>(
 		device,
 		context,
