@@ -200,3 +200,4 @@ _Pvt_Extensions
 *.png
 **/Binaries/
 **/bedrock-samples-main/
+./world/scop/textures/
