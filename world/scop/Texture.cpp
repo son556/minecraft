@@ -50,8 +50,16 @@ void readImage(
 				image[4 * i + 3] = img[i * channels + 3];
 		}
 	}
+	else if (channels == 1) {
+		for (size_t i = 0; i < width * height; i++) {
+			uint8_t g = img[i * channels + 0];
+			for (size_t c = 0; c < 4; c++) {
+				image[4 * i + c] = g;
+			}
+		}
+	}
 	else {
-		cout << "Read 3 or 4 channels images only." << endl;
+		cout << "Read 3 or 4 or 1 channels images only." << endl;
 		exit(-1);
 	}
 	delete img;
@@ -128,9 +136,11 @@ Texture::Texture(
 	CHECK(hr);
 	context->CopySubresourceRegion(tex.Get(), 0, 0, 0, 0,
 		staging_texture.Get(), 0, nullptr);
+
 	hr = device->CreateShaderResourceView(tex.Get(), nullptr,
 		this->sharder_resource_view.GetAddressOf());
 	CHECK(hr);
+	context->GenerateMips(this->sharder_resource_view.Get());
 }
 
 Texture::~Texture()

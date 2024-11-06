@@ -12,6 +12,7 @@ class RasterizerState;
 class DeferredBuffer;
 class HullShader;
 class DomainShader;
+class Texture;
 
 class GeoRender
 {
@@ -30,6 +31,11 @@ public:
 
 private:
 	void setPipe();
+
+private:
+	shared_ptr<Texture> tmp_tex;
+	shared_ptr<Texture> tmp_tex_normal;
+	shared_ptr<Texture> tmp_tex_height;
 
 private:
 	MapUtils* m_info;

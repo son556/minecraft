@@ -2,107 +2,40 @@
 
 #include "WorldUtils.h"
 
+
+inline Mat calcTangentSpace(
+	vec3 pos1, vec3 pos2, vec3 pos3,
+	vec2 uv1, vec2 uv2, vec2 uv3
+)
+{
+	Mat res;
+	vec2 deltaUV1 = uv2 - uv1;
+	vec2 deltaUV2 = uv3 - uv1;
+	vec3 edge1 = pos2 - pos1; // edge
+	vec3 edge2 = pos3 - pos1; // edge
+	float f = 1.0f /
+		(deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+
+	vec3 tangent;
+	tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+	tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+	tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+	tangent.Normalize();
+
+	vec3 bitangent;
+	bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+	bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+	bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+	bitangent.Normalize();
+
+	vec3 normal = tangent.Cross(bitangent);
+	normal.Normalize();
+
+	res = Mat(tangent, bitangent, normal);
+
+	return res;
+}
 namespace Block {
-	inline void addBlockFacePosAndTex(
-		vec3 const& start_pos,
-		int dir,
-		float x,
-		float y,
-		float z,
-		int type,
-		vector<VertexGeo>& vertices
-	)
-	{
-		static vector<vec3> sample_pos = {
-			// top
-			{-0.5f, +0.5f, -0.5f},
-			{-0.5f, +0.5f, +0.5f},
-			{+0.5f, +0.5f, +0.5f},
-			{+0.5f, +0.5f, -0.5f},
-
-			// bottom
-			{-0.5f, -0.5f, -0.5f},
-			{+0.5f, -0.5f, -0.5f},
-			{+0.5f, -0.5f, +0.5f},
-			{-0.5f, -0.5f, +0.5f},
-
-			// front
-			{-0.5f, -0.5f, -0.5f},
-			{-0.5f, +0.5f, -0.5f},
-			{+0.5f, +0.5f, -0.5f},
-			{+0.5f, -0.5f, -0.5f},
-
-			// back
-			{-0.5f, -0.5f, +0.5f},
-			{+0.5f, -0.5f, +0.5f},
-			{+0.5f, +0.5f, +0.5f},
-			{-0.5f, +0.5f, +0.5f},
-
-			// left
-			{-0.5f, -0.5f, +0.5f},
-			{-0.5f, +0.5f, +0.5f},
-			{-0.5f, +0.5f, -0.5f},
-			{-0.5f, -0.5f, -0.5f},
-
-			// right
-			{+0.5f, -0.5f, +0.5f},
-			{+0.5f, -0.5f, -0.5f},
-			{+0.5f, +0.5f, -0.5f},
-			{+0.5f, +0.5f, +0.5f}
-		};
-		static vector<vec2> sample_uv = {
-			{0.f, 1.f},
-			{0.f, 0.f},
-			{1.f, 0.f},
-			{1.f, 1.f},
-
-			{0.f, 0.f},
-			{1.f, 0.f},
-			{1.f, 1.f},
-			{0.f, 1.f},
-
-			{0.f, 1.f},
-			{0.f, 0.f},
-			{1.f, 0.f},
-			{1.f, 1.f},
-
-			{1.f, 1.f},
-			{0.f, 1.f},
-			{0.f, 0.f},
-			{1.f, 0.f},
-
-			{0.f, 1.f},
-			{0.f, 0.f},
-			{1.f, 0.f},
-			{1.f, 1.f},
-
-			{1.f, 1.f},
-			{0.f, 1.f},
-			{0.f, 0.f},
-			{1.f, 0.f}
-		};
-		static vector<vec3> normals = {
-			{0, 1, 0},
-			{0, -1, 0},
-			{0, 0, -1},
-			{0, 0, 1},
-			{-1, 0, 0},
-			{1, 0, 0}
-		};
-		VertexGeo vertex;
-		x = start_pos.x + x;
-		y = start_pos.y + y;
-		z = start_pos.z - z;
-		for (int i = dir * 4; i < dir * 4 + 4; i++) {
-			vertex.pos = sample_pos[i] + vec3(x, y, z);
-			vertex.normal = normals[dir];
-			vertex.uv = sample_uv[i];
-			vertex.type = type;
-			vertex.dir = dir;
-			vertices.push_back(vertex);
-		}
-	}
-
 	inline void addFaceQuadPosAndTex(
 		vec3 const& start_pos,
 		int dir,
@@ -196,6 +129,14 @@ namespace Block {
 			{-1, 0, 0},
 			{1, 0, 0}
 		};
+		static vector<vec3> tangents = {
+			{1, 0, 0},
+			{1, 0, 0},
+			{1, 0, 0},
+			{-1, 0, 0},
+			{0, 0, -1},
+			{0, 0, -1}
+		};
 		VertexGeo vertex;
 		x = start_pos.x + x;
 		y = start_pos.y + y;
@@ -203,9 +144,9 @@ namespace Block {
 		for (int i = dir * 4; i < dir * 4 + 4; i++) {
 			vertex.pos = pos[i] + vec3(x, y, z);
 			vertex.normal = normals[dir];
+			vertex.tangent = tangents[dir];
 			vertex.uv = uv[i];
 			vertex.type = type;
-			vertex.dir = dir;
 			vertices.push_back(vertex);
 		}
 	}

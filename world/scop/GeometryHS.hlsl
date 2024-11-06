@@ -3,9 +3,9 @@ struct HS_INPUT
     int type : TYPE;
     float4 pos : POSITION;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
     float3 world_pos : POSITION_WORLD;
     float2 uv : TEXCOORD;
-    int dir : DIRECTION;
 };
 
 struct DS_INPUT
@@ -13,9 +13,9 @@ struct DS_INPUT
     int type : TYPE;
     float4 pos : POSITION;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
     float3 world_pos : POSITION_WORLD;
     float2 uv : TEXCOORD;
-    int dir : DIRECTION;
 };
 
 cbuffer ConstData : register(b0)
@@ -37,14 +37,14 @@ PatchConstOutput CalcHSPatchConstants(
 {
 	
     PatchConstOutput output;
-    float3 center = 0;
+    float3 center = float3(0, 0, 0);
     for (int i = 0; i < 4; i++)
         center += ip[i].pos.xyz;
     center *= 0.25;
     float dist = length(center - eye_pos);
     float dist_min = 0.5;
     float dist_max = 20;
-    float tess = 32 * 
+    float tess = 64 * 
         saturate((dist_max - dist) / (dist_max - dist_min)) + 1;
     
     output.edges[0] = tess;
@@ -69,7 +69,7 @@ DS_INPUT main(
 {
 	DS_INPUT output;
 
-	output.dir = ip[i].dir;
+	output.tangent = ip[i].tangent;
     output.normal = ip[i].normal;
     output.pos = ip[i].pos;
     output.pos.w = 1;
