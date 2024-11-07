@@ -33,16 +33,13 @@ private:
 	void setPipe();
 
 private:
-	shared_ptr<Texture> tmp_tex;
-	shared_ptr<Texture> tmp_tex_normal;
-	shared_ptr<Texture> tmp_tex_height;
-
-private:
 	MapUtils* m_info;
 	DeferredGraphics* d_graphic;
 	shared_ptr<DeferredBuffer> d_buffer;
 	shared_ptr<RasterizerState> rasterizer_state;
-	shared_ptr<TextureArray> texture_array;
+	shared_ptr<TextureArray> texture_array_color;
+	shared_ptr<TextureArray> texture_array_normal;
+	shared_ptr<TextureArray> texture_array_s;
 	shared_ptr<SamplerState> sampler_state;
 	shared_ptr<VertexShader> vertex_shader;
 	shared_ptr<PixelShader> pixel_shader;

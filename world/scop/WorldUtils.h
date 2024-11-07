@@ -149,7 +149,7 @@ struct WorldIndex {
 };
 
 struct VertexGeo {
-	int type;
+	int tex_arr_idx;
 	vec3 pos;
 	vec3 normal;
 	vec3 tangent;

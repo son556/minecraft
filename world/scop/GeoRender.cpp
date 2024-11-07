@@ -37,51 +37,31 @@ GeoRender::GeoRender(
 		//D3D11_FILL_WIREFRAME,
 		D3D11_CULL_BACK
 	);
-	vector<wstring> path_arr = {
-		L"./textures/blocks/grass_top.png",
-		L"./textures/blocks/grass_bottom.png",
-		L"./textures/blocks/grass_side.png"
-	};
-	
-	/*this->tmp_tex = make_shared<Texture>(
-		device,
-		context,
-		"./textures/pbr/grass_top/grass_basecolor.png",
-		0
-	);*/
-	/*this->tmp_tex_normal = make_shared<Texture>(
-		device,
-		context,
-		"./textures/pbr/grass_top/grass_normal.png",
-		0
-	);*/
-	{// test
-		this->tmp_tex = make_shared<Texture>(
-			device,
-			context,
-			"./textures/pbr/test_sample/bricks_color.png",
-			0
-		);
-		this->tmp_tex_normal = make_shared<Texture>(
-			device,
-			context,
-			"./textures/pbr/test_sample/bricks_normal.png",
-			0
-		);
-		this->tmp_tex_height = make_shared<Texture>(
-			device,
-			context,
-			"./textures/pbr/test_sample/bricks_height.png",
-			0
-		);
-	}
 
-	this->texture_array = make_shared<TextureArray>(
+	vector<wstring> path_color = {
+		L"./textures/pbr/test_sample/grass_path_top.png",
+		L"./textures/pbr/test_sample/grass_path_side.png",
+		L"./textures/pbr/test_sample/packed_mud.png"
+	};
+	this->texture_array_color = make_shared<TextureArray>(
 		device,
 		context,
-		path_arr,
+		path_color,
 		0
 	);
+
+	vector<wstring> path_normal = {
+		L"./textures/pbr/test_sample/grass_path_top_n.png",
+		L"./textures/pbr/test_sample/grass_path_side_n.png",
+		L"./textures/pbr/test_sample/packed_mud_n.png"
+	};
+	this->texture_array_normal = make_shared<TextureArray>(
+		device,
+		context,
+		path_normal,
+		0
+	);
+
 	this->sampler_state = make_shared<SamplerState>(device);
 	this->vertex_shader = make_shared<VertexShader>(
 		device,
@@ -198,12 +178,7 @@ void GeoRender::setPipe()
 	context->PSSetShaderResources(
 		0,
 		1,
-		this->texture_array->getComPtr().GetAddressOf()
-	);
-	context->PSSetShaderResources(
-		1,
-		1,
-		this->tmp_tex->getComPtr().GetAddressOf()
+		this->texture_array_color->getComPtr().GetAddressOf()
 	);
 	context->HSSetShader(
 		this->hull_shader->getComPtr().Get(),
@@ -215,8 +190,9 @@ void GeoRender::setPipe()
 		nullptr,
 		0
 	);
-	context->DSSetShaderResources(0, 1,
-		this->tmp_tex_normal->getComPtr().GetAddressOf());
-	context->DSSetShaderResources(1, 1,
-		this->tmp_tex_height->getComPtr().GetAddressOf());
+	context->DSSetShaderResources(
+		0,
+		1,
+		this->texture_array_normal->getComPtr().GetAddressOf()
+	);
 }
