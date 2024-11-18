@@ -44,9 +44,9 @@ PatchConstOutput CalcHSPatchConstants(
     float dist = length(center - eye_pos);
     float dist_min = 0.5;
     float dist_max = 20;
-    float tess = 32 * 
+    float tess = 64 * 
         saturate((dist_max - dist) / (dist_max - dist_min)) + 1;
-    
+    //tess = 64;
     output.edges[0] = tess;
     output.edges[1] = tess;
     output.edges[2] = tess;

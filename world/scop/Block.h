@@ -38,6 +38,7 @@ inline Mat calcTangentSpace(
 }
 
 namespace Block {
+
 	inline void addFaceQuadPosAndTex(
 		vec3 const& start_pos,
 		int dir,
@@ -134,10 +135,10 @@ namespace Block {
 		static vector<vec3> tangents = {
 			{1, 0, 0},
 			{1, 0, 0},
-			{1, 0, 0},
-			{-1, 0, 0},
-			{0, 0, -1},
-			{0, 0, -1}
+			{1, 0, 0}, // front
+			{-1, 0, 0}, // back
+			{0, 0, -1}, // left
+			{0, 0, -1} // right
 		};
 		VertexGeo vertex;
 		x = start_pos.x + x;
@@ -160,6 +161,19 @@ namespace Block {
 			vertex.tex_arr_idx = idx;
 			vertices.push_back(vertex);
 		}
+	}
+
+	inline void addBlocQuadIndices( // test
+		uint32 start,
+		vector<uint32>& indices
+	)
+	{
+		indices.push_back(start);
+		indices.push_back(start + 1);
+		indices.push_back(start + 2);
+		indices.push_back(start + 3);
+		indices.push_back(start + 2);
+		indices.push_back(start + 1);
 	}
 
 	inline void addBlockFacePosAndTex(
