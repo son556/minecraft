@@ -77,6 +77,12 @@ DeferredRendering::DeferredRendering(
 		indices.size(),
 		D3D11_BIND_INDEX_BUFFER
 	);
+	this->view_port.TopLeftX = 0.0f;
+	this->view_port.TopLeftY = 0.0f;
+	this->view_port.Width = this->m_info->width;
+	this->view_port.Height = this->m_info->height;
+	this->view_port.MinDepth = 0.f;
+	this->view_port.MaxDepth = 1.f;
 }
 
 DeferredRendering::~DeferredRendering()
@@ -184,6 +190,7 @@ void DeferredRendering::Render(
 
 	// result render start
 	this->d_graphic->renderBegin();
+	this->d_graphic->setViewPort(this->view_port);
 	this->setPipe();
 	context->PSSetShaderResources(0, 1,
 		this->pbr.getAmbientLight().GetAddressOf());

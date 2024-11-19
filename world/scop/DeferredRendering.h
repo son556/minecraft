@@ -47,6 +47,7 @@ private:
 	SsaoBlur ssao_blur;
 	PBR pbr;
 	shared_ptr<Wallpaper> cube_map;
+	D3D11_VIEWPORT view_port;
 
 private:
 	shared_ptr<VertexShader> vertex_shader;

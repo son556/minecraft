@@ -252,6 +252,7 @@ void GeoRender::setConstantBuffer(
 		this->eye_pos_cbuffer->getComPtr().GetAddressOf());
 	
 	// set ps constant
+	this->view_cbuffer->update(mvp.view);
 	context->PSSetConstantBuffers(0, 1,
 		this->view_cbuffer->getComPtr().GetAddressOf());
 }
