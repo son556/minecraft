@@ -242,7 +242,7 @@ void GeoRender::setConstantBuffer(
 		this->eye_pos_cbuffer->getComPtr().GetAddressOf());
 	
 	// set ds constant
-	MVP mvp;
+	MVP mvp;  
 	mvp.view = view.Transpose();
 	mvp.proj = proj.Transpose();
 	this->mvp_cbuffer->update(mvp);

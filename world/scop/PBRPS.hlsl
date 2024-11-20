@@ -47,10 +47,11 @@ float3 diffuseIBL(
     float3 F0 = lerp(Fdielectric, albedo, metallic);
     float3 F = schilckFresnel(F0, max(0.0,
         dot(normal_w, pixel_to_eye)));
+    metallic = 0.f;
     float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
     float3 irradiance = irradiance_tex.Sample(linear_sampler,
         normal_w).rgb;
-    //return albedo * irradiance;
+    
     return kd * albedo * irradiance;
 }
 
@@ -144,7 +145,9 @@ PS_OUTPUT main(PS_INPUT input)
     float3 F0 = lerp(Fdielectric, albedo, metallic);
     float3 F = schilckFresnel(F0,
         max(0.0, dot(halfway, pixel_to_eye)));
-    float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
+    
+    float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), 
+        metallic);
     float3 diffuse_brdf = kd * albedo;
     
     float D = NdfGGX(NdotH, roughness);
@@ -154,5 +157,6 @@ PS_OUTPUT main(PS_INPUT input)
     direct_light = (diffuse_brdf + specualr_brdf) * radiance * NdotI;
     output.ambient_light = float4(ambient_light, 1);
     output.direct_light = float4(direct_light, 1);
+    
     return output;
 }

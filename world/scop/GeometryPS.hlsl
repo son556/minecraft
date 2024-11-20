@@ -48,7 +48,8 @@ PS_OUTPUT main(PS_INPUT input)
     float3x3 tbn = float3x3(tangent, bitangent, input.normal);
     normal = normalize(mul(normal, tbn));
     output.w_normal = float4(normal, 1);
-    output.normal = float4(mul(input.normal, (float3x3) view), 1);
+    //output.normal = float4(mul(input.normal, (float3x3) view), 1);
+    output.normal = float4(mul(normal, (float3x3) view), 1);
     float r = texture_arr_s.Sample(sampler_linear, uvw).r;
     float m = texture_arr_s.Sample(sampler_linear, uvw).g;
     output.roughness = float4(r, r, r, 1);

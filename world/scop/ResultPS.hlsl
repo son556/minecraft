@@ -30,8 +30,10 @@ float4 main(PS_INPUT input) : SV_TARGET
     sp = max(sp, 0.1);
     float4 ssao = ssao_map.Sample(sampler0, input.uv);
     float4 res = float4(sp, sp, sp, 1) * ssao;
-    color = float4(a_color.xyz + d_color.xyz, 1);
+    if (sp >= 0.9f)
+        color = float4(a_color.xyz * ssao.xyz + d_color.xyz, 1);
+    else
+        color = float4(a_color.xyz, 1) * ssao;
     color = clamp(color, 0.0, 1000.0);
-    //return color;
-    return color * res;
+    return color * sp;
 }
