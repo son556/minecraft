@@ -80,7 +80,7 @@ PBR::PBR(DeferredGraphics* grpahic, UINT width, UINT height)
 		device,
 		L"./textures/skybox/HDRI/MyCubesDiffuseHDR.dds",
 		true
-	);
+	);  
 	this->specular_tex = make_shared<Texture>(
 		device,
 		L"./textures/skybox/HDRI/MyCubesSpecularHDR.dds",

@@ -24,7 +24,7 @@ GeoRender::GeoRender(
 {
 	this->m_info = minfo;
 	this->d_graphic = dgraphic;
-	this->d_buffer = make_shared<DeferredBuffer>(7);
+	this->d_buffer = make_shared<DeferredBuffer>(6);
 	this->d_buffer->setRTVsAndSRVs(
 		this->d_graphic->getDevice(),
 		this->m_info->width,
@@ -48,7 +48,7 @@ GeoRender::GeoRender(
 		device,
 		context,
 		path_color,
-		0
+		0, true // temp
 	);
 	vector<wstring> path_normal = {
 		L"./textures/pbr/test_sample/grass_path_top_n.png",
@@ -122,12 +122,6 @@ GeoRender::GeoRender(
 		device,
 		context,
 		eye
-	);
-	Mat view;
-	this->view_cbuffer = make_shared<ConstantBuffer>(
-		device,
-		context,
-		view
 	);
 }
 
@@ -250,9 +244,4 @@ void GeoRender::setConstantBuffer(
 		this->mvp_cbuffer->getComPtr().GetAddressOf());
 	context->DSSetConstantBuffers(1, 1,
 		this->eye_pos_cbuffer->getComPtr().GetAddressOf());
-	
-	// set ps constant
-	this->view_cbuffer->update(mvp.view);
-	context->PSSetConstantBuffers(0, 1,
-		this->view_cbuffer->getComPtr().GetAddressOf());
 }

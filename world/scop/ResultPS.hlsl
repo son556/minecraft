@@ -12,18 +12,29 @@ Texture2D cube_map : register(t4);
 
 SamplerState sampler0 : register(s0);
 
+float3 LinearToneMapping(float3 color)
+{
+    float3 invGamma = float3(1, 1, 1) / 2.2f;
+
+    color = clamp(color, 0., 1.);
+    color = pow(color, invGamma);
+    return color;
+}
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float3 a_color = 
         ambient_color.Sample(sampler0, input.uv).rgb;
+    a_color = LinearToneMapping(a_color);
     //return float4(a_color, 1);
     float3 d_color = 
         directional_color.Sample(sampler0, input.uv).rgb;
+    d_color = LinearToneMapping(d_color);
     float4 color = float4(a_color + d_color, 1);
     //color = float4(a_color, 1);
     if (color.r == 0 && color.g == 0 && color.b == 0)
-        return cube_map.Sample(sampler0, input.uv);
+        return float4(LinearToneMapping(
+            cube_map.Sample(sampler0, input.uv).rgb), 1);
     
     float sp = shadow_map.Sample(sampler0, input.uv).r;
     sp /= 15.f;
@@ -35,5 +46,6 @@ float4 main(PS_INPUT input) : SV_TARGET
     else
         color = float4(a_color.xyz, 1) * ssao;
     color = clamp(color, 0.0, 1000.0);
+    //color = float4(LinearToneMapping(color.rgb), 1);
     return color * sp;
 }

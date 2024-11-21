@@ -6,6 +6,7 @@ Texture2D roughness_tex : register(t4);
 TextureCube irradiance_tex : register(t5);
 TextureCube specular_tex : register(t6);
 Texture2D brdf_tex : register(t7);
+Texture2D ao_tex : register(t8);
 
 SamplerState linear_sampler : register(s0);
 SamplerState clamp_sampler : register(s1);
@@ -47,11 +48,12 @@ float3 diffuseIBL(
     float3 F0 = lerp(Fdielectric, albedo, metallic);
     float3 F = schilckFresnel(F0, max(0.0,
         dot(normal_w, pixel_to_eye)));
-    metallic = 0.f;
     float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
+    
     float3 irradiance = irradiance_tex.Sample(linear_sampler,
         normal_w).rgb;
-    
+    if (irradiance.r + irradiance.g + irradiance.b > 1.2)
+        irradiance *= 0.3;
     return kd * albedo * irradiance;
 }
 
@@ -63,6 +65,7 @@ float3 specularIBL(
     float roughness
 )
 {
+    roughness = 1 - mettalic;
     float2 specularBRDF = brdf_tex.Sample(clamp_sampler,
         float2(dot(normal_w, pixel_to_eye), 1.0 - roughness)).rg;
     
@@ -87,7 +90,7 @@ float3 ambientLighting(
         mettalic);
     float3 specular = specularIBL(albedo, normal_w, pixel_to_eye,
         mettalic, roughness);
-    
+
     return (diffuse + specular) * ao;
 }
 
@@ -126,9 +129,11 @@ PS_OUTPUT main(PS_INPUT input)
         return output;
     }
     float3 pixel_to_eye = normalize(eye_pos.xyz - pos);
-    float ao = 1.f;
+    float ao = ao_tex.Sample(linear_sampler, input.uv).r;
     float metallic = metallic_tex.Sample(linear_sampler, input.uv).r;
     float roughness = roughness_tex.Sample(linear_sampler, input.uv).r;
+    roughness = 1 - metallic;
+    
     float3 ambient_light = ambientLighting(albedo, normal,
         pixel_to_eye, ao, metallic, roughness);
     
