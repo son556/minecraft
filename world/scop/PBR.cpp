@@ -80,7 +80,7 @@ PBR::PBR(DeferredGraphics* grpahic, UINT width, UINT height)
 		device,
 		L"./textures/skybox/HDRI/MyCubesDiffuseHDR.dds",
 		true
-	);  
+	);
 	this->specular_tex = make_shared<Texture>(
 		device,
 		L"./textures/skybox/HDRI/MyCubesSpecularHDR.dds",
@@ -147,11 +147,11 @@ void PBR::setPipe()
 	context->PSSetShader(
 		this->pixel_shader->getComPtr().Get(),
 		nullptr, 0);
-	context->PSSetShaderResources(5, 1,
+	context->PSSetShaderResources(4, 1,
 		this->irradiance_tex->getComPtr().GetAddressOf());
-	context->PSSetShaderResources(6, 1,
+	context->PSSetShaderResources(5, 1,
 		this->specular_tex->getComPtr().GetAddressOf());
-	context->PSSetShaderResources(7, 1,
+	context->PSSetShaderResources(6, 1,
 		this->brdf_tex->getComPtr().GetAddressOf());
 	context->PSSetSamplers(0, 1,
 		this->sampler_state_linear->getComPtr().GetAddressOf());

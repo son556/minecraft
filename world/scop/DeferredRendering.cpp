@@ -176,7 +176,7 @@ void DeferredRendering::Render(
 	this->d_graphic->renderBegin(
 		this->ssao_render.getDBuffer().get());
 	context->PSSetShaderResources(0, 1,
-		this->g_render.getSRV(RTVIndex::w_normal).GetAddressOf()
+		this->g_render.getSRV(RTVIndex::ssao_normal).GetAddressOf()
 	);
 	context->PSSetShaderResources(1, 1,
 		this->g_render.getSRV(RTVIndex::w_position).GetAddressOf()
@@ -254,9 +254,5 @@ void DeferredRendering::setPBRShaderResources()
 	context->PSSetShaderResources(2, 1,
 		this->g_render.getSRV(RTVIndex::w_position).GetAddressOf());
 	context->PSSetShaderResources(3, 1,
-		this->g_render.getSRV(RTVIndex::metallic).GetAddressOf());
-	context->PSSetShaderResources(4, 1,
-		this->g_render.getSRV(RTVIndex::roughness).GetAddressOf());
-	context->PSSetShaderResources(8, 1,
-		this->g_render.getSRV(RTVIndex::ao).GetAddressOf());
+		this->g_render.getSRV(RTVIndex::rma).GetAddressOf());
 }

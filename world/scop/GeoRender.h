@@ -18,11 +18,10 @@ class Texture;
 enum class RTVIndex
 {
 	color,
-	ao,
 	w_position,
 	w_normal,
-	metallic,
-	roughness,
+	rma, //r: roughness, g: metallic, b: ambient occlusion
+	ssao_normal,
 };
 
 class GeoRender

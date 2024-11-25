@@ -24,7 +24,7 @@ GeoRender::GeoRender(
 {
 	this->m_info = minfo;
 	this->d_graphic = dgraphic;
-	this->d_buffer = make_shared<DeferredBuffer>(6);
+	this->d_buffer = make_shared<DeferredBuffer>(5);
 	this->d_buffer->setRTVsAndSRVs(
 		this->d_graphic->getDevice(),
 		this->m_info->width,
@@ -44,6 +44,11 @@ GeoRender::GeoRender(
 		L"./textures/pbr/test_sample/grass_path_side.png",
 		L"./textures/pbr/test_sample/packed_mud.png"
 	};
+	/*path_color = {
+		L"./textures/pbr/test_sample/redstone_t/redstone_lamp_on.png",
+		L"./textures/pbr/test_sample/grass_path_side.png",
+		L"./textures/pbr/test_sample/packed_mud.png"
+	};*/
 	this->texture_array_color = make_shared<TextureArray>(
 		device,
 		context,
@@ -55,6 +60,11 @@ GeoRender::GeoRender(
 		L"./textures/pbr/test_sample/grass_path_side_n.png",
 		L"./textures/pbr/test_sample/packed_mud_n.png"
 	};
+	/*path_normal = {
+		L"./textures/pbr/test_sample/redstone_t/redstone_lamp_on_n.png",
+		L"./textures/pbr/test_sample/grass_path_side_n.png",
+		L"./textures/pbr/test_sample/packed_mud_n.png"
+	};*/
 	this->texture_array_normal = make_shared<TextureArray>(
 		device,
 		context,
@@ -67,6 +77,11 @@ GeoRender::GeoRender(
 		L"./textures/pbr/test_sample/grass_path_side_s.png",
 		L"./textures/pbr/test_sample/packed_mud_s.png"
 	};
+	/*path_s = {
+		L"./textures/pbr/test_sample/redstone_t/redstone_lamp_on_s.png",
+		L"./textures/pbr/test_sample/packed_mud_s.png",
+		L"./textures/pbr/test_sample/packed_mud_s.png"
+	};*/
 	this->texture_array_s = make_shared<TextureArray>(
 		device,
 		context,
@@ -214,6 +229,8 @@ void GeoRender::setPipe()
 		nullptr,
 		0
 	);
+	context->DSSetShaderResources(0, 1, // test
+		this->texture_array_normal->getComPtr().GetAddressOf());
 }
 
 void GeoRender::setConstantBuffer(
@@ -243,5 +260,9 @@ void GeoRender::setConstantBuffer(
 	context->DSSetConstantBuffers(0, 1,
 		this->mvp_cbuffer->getComPtr().GetAddressOf());
 	context->DSSetConstantBuffers(1, 1,
+		this->eye_pos_cbuffer->getComPtr().GetAddressOf());
+
+	// set ps constant
+	context->PSSetConstantBuffers(0, 1,
 		this->eye_pos_cbuffer->getComPtr().GetAddressOf());
 }
