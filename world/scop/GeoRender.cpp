@@ -229,7 +229,9 @@ void GeoRender::setPipe()
 		nullptr,
 		0
 	);
-	context->DSSetShaderResources(0, 1, // test
+
+	// 실제 vertex위치 옮기는 경우
+	context->DSSetShaderResources(0, 1,
 		this->texture_array_normal->getComPtr().GetAddressOf());
 }
 

@@ -23,7 +23,7 @@ struct PS_OUTPUT
     float4 ssao_normal : SV_Target4;
 };
 
-static float height_scale = 0.8;
+static float height_scale = 0.42;
 
 cbuffer c : register(b0)
 {
@@ -87,14 +87,13 @@ PS_OUTPUT main(PS_INPUT input)
     bitangent = normalize(bitangent);
     float3x3 tbn = float3x3(tangent, bitangent, input.normal);
     
-    // parallaxmapping 안할거면 끄기
+    // parallax occlusion mapping 안할거면 끄기
     bool parallax_flag = true;
     if (parallax_flag)
     {
         float2 origin_uv = uvw.xy;
-        uvw = parallaxOcclusionMapping(uvw, calcViewDir(input.w_pos, tbn));
-        if (uvw.x > 1.0 || uvw.y > 1.0 || uvw.x < 0.0 || uvw.y < 0.0)
-            uvw = float3(input.uv, input.tex_arr_idx);
+        uvw = parallaxOcclusionMapping(uvw, 
+            calcViewDir(input.w_pos, tbn));
         float2 delta_uv = uvw.xy - origin_uv;
         float2 offset_xy = mul(delta_uv, float2x3(tangent, bitangent));
         output.w_pos += float4(offset_xy, 0, 0);
