@@ -78,10 +78,6 @@ ShadowRender::ShadowRender(
 				this->d_graphic, 4096, 4096, this->m_info));
 		srvs_vec.push_back(this->csms.back()->getSRV());
 	}
-	this->sd_buffer = make_shared<DeferredBuffer>(1);
-	this->sd_buffer->setRTVsAndSRVs(
-		this->d_graphic->getDevice(),
-		4096, 4096);
 	this->tex2d_arr = make_shared<TextureArray>(
 		this->d_graphic->getDevice(),
 		this->d_graphic->getContext(),
@@ -275,7 +271,7 @@ void ShadowRender::renderShadow(
 	for (int k = 0; k < split_cnt; k++) {
 		context->VSSetConstantBuffers(0, 1,
 			this->csms[k]->getCBuffer()->getComPtr().GetAddressOf());
-		this->d_graphic->renderBegin(this->sd_buffer.get(), 
+		this->d_graphic->renderBegin(this->csms[k]->getDBuffer().get(),
 			this->csms[k]->getDSV());
 		this->d_graphic->setViewPort(this->csms[k]->getViewPort());
 		for (int i = 0; i < this->m_info->size_h; i++) {
@@ -299,6 +295,6 @@ ComPtr<ID3D11ShaderResourceView> ShadowRender::getSRV()
 ComPtr<ID3D11ShaderResourceView> ShadowRender::getCSMSRV(int idx)
 {
 	//return this->d_buffer->getSRV(0);
-	return this->sd_buffer->getSRV(0);
+	return this->csms[idx]->getDBuffer()->getSRV(0);
 	return this->csms[idx]->getSRV();
 }

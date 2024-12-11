@@ -4,6 +4,7 @@ class DeferredGraphics;
 class DepthMap;
 class ConstantBuffer;
 class MapUtils;
+class DeferredBuffer;
 
 class CascadeShadow
 {
@@ -26,6 +27,9 @@ public:
 	MVP const& getMVP();
 	D3D11_VIEWPORT getViewPort();
 
+public: // test
+	shared_ptr<DeferredBuffer> getDBuffer();
+
 private:
 	DeferredGraphics* d_graphic;
 	MapUtils* m_info;
@@ -33,5 +37,10 @@ private:
 	float frustum_vertices[2][4][3];
 	shared_ptr<ConstantBuffer> cbuffer;
 	MVP mvp;
+	float width;
+	float height;
+
+private: // test
+	shared_ptr<DeferredBuffer> d_buffer;
 };
 

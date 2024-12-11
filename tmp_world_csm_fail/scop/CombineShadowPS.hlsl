@@ -39,6 +39,7 @@ float shadowCheck(float4 w_pos, int shadow_idx, float3 normal, float p_dis)
     float3 light_dir = light_pos.xyz;
     light_dir.z = w_pos.z;
     light_dir = normalize(w_pos.xyz - light_dir);
+    w_pos += float4(normal, 0) * 0.1; // self shadow 방지
     w_pos = mul(w_pos, mvp_arr[shadow_idx].view);
     w_pos = mul(w_pos, mvp_arr[shadow_idx].proj);
     w_pos /= w_pos.w; // ndc
@@ -65,7 +66,6 @@ float4 main(PS_INPUT input) : SV_TARGET
             return float4(res, res, res, 1);
         }
     }
-    res = shadowCheck(input.w_pos, light_pos.w, input.normal, 
-            z_arr[7]);
+    res = 1;
     return float4(res, res, res, 1.0f);
 }

@@ -59,7 +59,6 @@ private:
 private:
 	vector<MVP> mvps;
 	vector<shared_ptr<CascadeShadow>> csms;
-	shared_ptr<DeferredBuffer> sd_buffer;
 	shared_ptr<StructuredBuffer> structured_buffer;
 	shared_ptr<TextureArray> tex2d_arr;
 	shared_ptr<PixelShader> s_pixel_shader;

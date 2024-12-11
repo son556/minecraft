@@ -157,6 +157,7 @@ void DeferredRendering::Render(
 	this->cube_map->render(cam_pos, cam_view, cam_proj);
 	this->m_info->directional_light_pos = 
 		this->cube_map->getDirectionalLightPos();
+	this->m_info->cam_pos;
 	this->m_info->light_dir = XMVector3Normalize(cam_pos - 
 		this->m_info->directional_light_pos);
 	// geo render
