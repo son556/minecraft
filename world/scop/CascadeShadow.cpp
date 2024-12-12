@@ -83,8 +83,8 @@ void CascadeShadow::updateCBuffer(
 
 	float len = (mid - coord[4]).Length();
 	float texel_per_unit = this->width / (len * 2.0f);
-	
-	Mat scalar = 
+
+	Mat scalar =
 		XMMatrixScaling(texel_per_unit, texel_per_unit, texel_per_unit);
 	vec3 zero(0, 0, 0);
 	vec3 up_dir(0, 1, 0);
