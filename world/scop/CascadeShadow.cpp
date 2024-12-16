@@ -84,22 +84,24 @@ void CascadeShadow::updateCBuffer(
 	float len = (mid - coord[4]).Length();
 	float texel_per_unit = this->width / (len * 2.0f);
 
+	vec3 ld = this->m_info->light_dir;
+	vec4 l_dir = vec4(ld.x, ld.y, ld.z, 1);
 	Mat scalar =
 		XMMatrixScaling(texel_per_unit, texel_per_unit, texel_per_unit);
 	vec3 zero(0, 0, 0);
 	vec3 up_dir(0, 1, 0);
-	vec3 base_look_at = -this->m_info->light_dir;
+	vec3 base_look_at = vec3(l_dir.x, l_dir.y, l_dir.z);
 	Mat look_at = XMMatrixLookAtLH(zero, base_look_at, up_dir);
 	look_at = scalar * look_at;
 	Mat inv_look = look_at.Invert();
-
 	mid.w = 1;
 	mid = XMVector4Transform(mid, look_at);
 	mid.x = floor(mid.x);
 	mid.y = floor(mid.y);
 	mid = XMVector4Transform(mid, inv_look);
+
 	vec3 center = vec3(mid.x, mid.y, mid.z);
-	vec3 eye = center - this->m_info->light_dir * 2.0f * len;
+	vec3 eye = center - base_look_at * 2.0f * len;
 	Mat light_look = XMMatrixLookAtLH(eye, center, up_dir);
 	this->mvp.view = light_look.Transpose();
 

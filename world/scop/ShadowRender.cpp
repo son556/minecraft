@@ -87,12 +87,11 @@ ShadowRender::ShadowRender(
 		InputLayouts::layout_deferred.size(),
 		this->vertex_shader->getBlob()
 	);
-	this->split_cnt = 3;
 	vector<ComPtr<ID3D11ShaderResourceView>> srvs_vec;
 	for (int i = 0; i < this->split_cnt; i++) {
 		this->csms.push_back(
 			make_shared<CascadeShadow>(
-				this->d_graphic, 4096, 4096, this->m_info));
+				this->d_graphic, 2048, 2048, this->m_info));
 		srvs_vec.push_back(this->csms.back()->getSRV());
 	}
 	this->tex2d_arr = make_shared<TextureArray>(
@@ -132,9 +131,6 @@ void ShadowRender::renderCSM(Mat const& cam_view, Mat const& cam_proj)
 	ComPtr<ID3D11DeviceContext> context =
 		this->d_graphic->getContext();
 
-	// shadow csm
-	vec3 lp = this->m_info->directional_light_pos;
-	this->frustum_split.light_pos = vec4(lp.x, lp.y, lp.z, this->split_cnt);
 	
 	// update structured buffer
 	for (int i = 0; i < split_cnt; i++) {
@@ -163,11 +159,6 @@ void ShadowRender::renderCSM(Mat const& cam_view, Mat const& cam_proj)
 			}
 		}
 	}
-
-	// shadow combine
-	for (int i = 0; i < this->split_cnt; i++)
-		this->tex2d_arr->updateTextureArray(context,
-			this->csms[i]->getSRV(), i); // update tex2d arr;
 }
 
 
@@ -225,8 +216,8 @@ void ShadowRender::setCSMPipe()
 
 void ShadowRender::devideFrustum() // view space
 {
-	float p_near = 0.1;
-	float p_far = 1000;
+	float p_near = 3.f;
+	float p_far = 250;
 	float r = 800.f / 650.f;
 	float fov = 60;
 	float theta = XMConvertToRadians(fov / 2);
@@ -234,16 +225,17 @@ void ShadowRender::devideFrustum() // view space
 	vector<tuple<float, float, float>> tmp;
 	tmp.resize(this->split_cnt + 1);
 	float t = 0.99;
+	t = 0.6;
 	int csm_idx = 0;
 	for (int i = 0; i < this->split_cnt + 1; i++) {
 		float ss = this->split_cnt;
-		float c_log = p_near * pow(p_far / p_near, i / ss);
+		float c_log = log(p_near * pow(p_far / p_near, i / ss));
 		float c_uni = p_near + (p_far - p_near) * (i / ss);
 		float c = t * c_log + (1.0 - t) * c_uni;
 		float h = c * tan(theta);
 		float w = h * r;
-		if (i)
-			this->frustum_split.vz_arr[i] = c;
+
+		this->frustum_split.vz_arr[i].x = c;
 		if (i == 0) {
 			this->csms[csm_idx]->setFrustumVertices(vec3(-w, h, c), 0, 0);
 			this->csms[csm_idx]->setFrustumVertices(vec3(w, h, c), 1, 0);
@@ -269,7 +261,9 @@ void ShadowRender::devideFrustum() // view space
 		}
 	}
 	for (int i = this->split_cnt + 1; i < 8; i++)
-		this->frustum_split.vz_arr[i] = p_far;
+		this->frustum_split.vz_arr[i].x = p_far;
+	/*for (int i = 0; i < 8; i++)
+		cout << "c: " << this->frustum_split.vz_arr[i] << endl;*/
 }
 
 void ShadowRender::render(
@@ -281,18 +275,23 @@ void ShadowRender::render(
 		this->d_graphic->getContext();
 
 	this->d_graphic->renderBegin(this->d_buffer.get());
+
+	// shadow csm
+	vec3 lp = this->m_info->directional_light_pos;
+	this->frustum_split.light_pos = vec4(lp.x, lp.y, lp.z, this->split_cnt);
 	this->frustum_split.view = cam_view.Transpose();
 	this->ps_cbuffer->update(this->frustum_split);
+
+
 	this->setPipe();
 	context->PSSetShaderResources(
-		0,
-		1,
-		this->tex2d_arr->getComPtr().GetAddressOf()
-	);
-	context->PSSetShaderResources(
-		1, 1,
+		0, 1,
 		this->structured_buffer->GetSRV().GetAddressOf()
 	);
+	for (int i = 1; i < this->split_cnt; i++) {
+		context->PSSetShaderResources(i, 1,
+			this->csms[i - 1]->getSRV().GetAddressOf());
+	}
 	context->DrawIndexed(
 		this->ibuffer->getCount(),
 		0, 0);

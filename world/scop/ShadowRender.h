@@ -16,7 +16,7 @@ template<typename T> class Buffer;
 
 struct FrusumSplit {
 	vec4 light_pos; // world space
-	float vz_arr[8]; // view space
+	vec4 vz_arr[8]; // view space
 	Mat view;
 };
 
@@ -57,7 +57,7 @@ private:
 	shared_ptr<ConstantBuffer> ps_cbuffer;
 
 private:
-	int split_cnt;
+	int split_cnt = 5;
 	FrusumSplit frustum_split;
 	shared_ptr<Buffer<VertexDefer>> vbuffer;
 	shared_ptr<Buffer<uint32>> ibuffer;
