@@ -98,6 +98,7 @@ void CascadeShadow::updateCBuffer(
 	mid = XMVector4Transform(mid, look_at);
 	mid.x = floor(mid.x);
 	mid.y = floor(mid.y);
+	mid.z = floor(mid.z);
 	mid = XMVector4Transform(mid, inv_look);
 
 	vec3 center = vec3(mid.x, mid.y, mid.z);

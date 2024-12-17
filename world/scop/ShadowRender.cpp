@@ -216,7 +216,7 @@ void ShadowRender::setCSMPipe()
 
 void ShadowRender::devideFrustum() // view space
 {
-	float p_near = 3.f;
+	float p_near = 5.f;
 	float p_far = 250;
 	float r = 800.f / 650.f;
 	float fov = 60;
