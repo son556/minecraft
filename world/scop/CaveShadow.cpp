@@ -54,6 +54,7 @@ CaveShadow::CaveShadow(DeferredGraphics* d_graphic, MapUtils* m_info)
 
 void CaveShadow::render(Mat const& cam_view, Mat const& cam_proj)
 {
+	this->setPipe();
 	MVP mvp;
 	mvp.view = cam_view.Transpose();
 	mvp.proj = cam_proj.Transpose();
@@ -82,6 +83,8 @@ void CaveShadow::setPipe()
 {
 	this->context->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	this->context->IASetInputLayout(
+		this->input_layout->getComPtr().Get());
 	this->context->VSSetShader(
 		this->vertex_shader->getComPtr().Get(),
 		nullptr,

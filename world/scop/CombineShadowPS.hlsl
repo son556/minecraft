@@ -5,7 +5,6 @@ struct MVP
     matrix proj;
 };
 StructuredBuffer<MVP> mvp_arr : register(t0);
-//Texture2DArray shadow_arr : register(t1);
 Texture2D shadow_0 : register(t1);
 Texture2D shadow_1 : register(t2);
 Texture2D shadow_2 : register(t3);

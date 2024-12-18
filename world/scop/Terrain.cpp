@@ -122,7 +122,6 @@ void Terrain::putBlock(
 				}
 			}
 			this->m_manager->m_info.addBlock(cidx, bidx, type);
-			// TODO: light system 적용
 			for (int y = bidx.y; y >= 0; y--) {
 				this->m_manager->m_info.setLight(cidx, bidx.x, y, bidx.z, 0);
 			}

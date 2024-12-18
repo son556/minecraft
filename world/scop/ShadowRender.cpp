@@ -288,7 +288,7 @@ void ShadowRender::render(
 		0, 1,
 		this->structured_buffer->GetSRV().GetAddressOf()
 	);
-	for (int i = 1; i < this->split_cnt; i++) {
+	for (int i = 1; i <= this->split_cnt; i++) {
 		context->PSSetShaderResources(i, 1,
 			this->csms[i - 1]->getSRV().GetAddressOf());
 	}

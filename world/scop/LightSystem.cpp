@@ -49,8 +49,8 @@ void LightSystem::lightBFS(int idx)
 }
 
 void LightSystem::fillLightThread(
-	vector<Index2> const& vec, 
-	int st, 
+	vector<Index2> const& vec,
+	int st,
 	int ed,
 	int idx
 )
