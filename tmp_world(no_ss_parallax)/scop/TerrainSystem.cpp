@@ -17,8 +17,8 @@ void TerrainSystem::fillChunk(Index2 const& c_idx, Index2 const& c_pos)
 		z = (c_pos.y - i + offset) / 32.f;
 		for (int j = 0; j < 16; j++) {
 			x = (c_pos.x + j + offset) / 32.f;
-			double h_ = this->perlin_noise.getNoise2D(x, z, 3, 0.5);
-			int16 h = static_cast<int16>((h_ + 0.8) * 0.5 * 50.f);
+			double h_ = this->perlin_noise.getNoise2D(x, z, 5, 0.5);
+			int16 h = static_cast<int16>((h_ + 1.0) * 0.5 * 50.f);
 			max_h = max(max_h, h);
 			this->m_info->setHeight(c_idx, j, i, h);
 			for (int y = 0; y < h; y++) {
