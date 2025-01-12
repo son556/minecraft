@@ -8,7 +8,7 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 pos : SV_Position;
-    float z : CLIP_SPACE;
+    float4 clip_pos : POSITION;
     float4 color : COLOR;
 };
 
@@ -23,10 +23,9 @@ PS_INPUT main( VS_INPUT input )
 {
     PS_INPUT output;
     output.pos = float4(input.pos, 1);
-    output.pos = mul(output.pos, model);
     output.pos = mul(output.pos, view);
     output.pos = mul(output.pos, proj);
-    output.z = output.pos.z;
+    output.clip_pos = output.pos;
     output.color = input.col;
 	return output;
 }

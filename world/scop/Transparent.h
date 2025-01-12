@@ -26,6 +26,9 @@ public:
 
 private:
 	ComPtr<ID3D11BlendState> blend_state;
+	ComPtr<ID3D11DepthStencilState> prev_ds_state;
+	UINT prev_ref;
+	ComPtr<ID3D11DepthStencilState> ds_state;
 	float clear_accum[4] = { 0.f, 0.f, 0.f, 0.f };
 	float clear_reveal[4] = { 1.f, 1.f, 1.f, 1.f };
 

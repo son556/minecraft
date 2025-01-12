@@ -122,8 +122,6 @@ void OIT::render(Mat const& cam_view, Mat const& cam_proj)
 		DXGI_FORMAT_R32_UINT,
 		0
 	);
-	context->PSSetShaderResources(0, 1,
-		this->solid_srv.GetAddressOf());
 	this->d_graphic->renderBegin(this->d_buff.get());
 	context->PSSetShaderResources(0, 1, this->solid_srv.GetAddressOf());
 	context->DrawIndexed(

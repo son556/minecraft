@@ -12,6 +12,8 @@
 #include "MapUtils.h"
 #include "SamplerState.h"
 
+#include "BlendState.h"
+
 Transparent::Transparent(
 	DeferredGraphics* d_graphic, 
 	MapUtils* minfo
@@ -79,7 +81,30 @@ Transparent::Transparent(
 		this->d_graphic->getContext(),
 		mvp
 	);
-	this->sampler_state = make_shared<SamplerState>(device);
+
+	this->d_graphic->getContext()->OMGetDepthStencilState(
+		this->prev_ds_state.GetAddressOf(),
+		&(this->prev_ref)
+	);
+	D3D11_DEPTH_STENCIL_DESC ds_desc;
+	ZeroMemory(&ds_desc, sizeof(ds_desc));
+	ds_desc.DepthEnable = false;
+	ds_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	ds_desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+	ds_desc.StencilEnable = false;
+	hr = device->CreateDepthStencilState(&ds_desc, this->ds_state.GetAddressOf());
+	CHECK(hr);
+
+	D3D11_SAMPLER_DESC sampler_desc;
+	ZeroMemory(&sampler_desc, sizeof(sampler_desc));
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	this->sampler_state = make_shared<SamplerState>(device, sampler_desc);
 }
 
 Transparent::~Transparent()
@@ -106,11 +131,14 @@ void Transparent::setPipe()
 	);
 	context->PSSetSamplers(0, 1,
 		this->sampler_state->getComPtr().GetAddressOf());
+
+	float arr[4] = { 1, 1, 1, 1 };
 	context->OMSetBlendState(
 		this->blend_state.Get(),
-		nullptr,
+		arr,
 		0xFFFFFFFF
 	);
+	context->OMSetDepthStencilState(this->ds_state.Get(), 0);
 }
 
 void Transparent::render(
@@ -122,10 +150,12 @@ void Transparent::render(
 	this->setPipe();
 	MVP mvp;
 	mvp.view = cam_view.Transpose();
-	mvp.proj = cam_view.Transpose();
+	mvp.proj = cam_proj.Transpose();
 	this->constant_buffer->update(mvp);
 	ComPtr<ID3D11DeviceContext> context = this->d_graphic->getContext();
 	this->d_graphic->renderBegin(this->d_buffer.get());
+	context->VSSetConstantBuffers(0, 1,
+		this->constant_buffer->getComPtr().GetAddressOf());
 	context->ClearRenderTargetView(
 		this->d_buffer->getRTV(0).Get(),
 		this->clear_accum
@@ -135,10 +165,7 @@ void Transparent::render(
 		this->clear_reveal
 	);
 
-	context->OMSetDepthStencilState(nullptr, 0);
 	context->PSSetShaderResources(0, 1, depth_srv.GetAddressOf());
-	context->VSSetConstantBuffers(0, 1,
-		this->constant_buffer->getComPtr().GetAddressOf());
 	for (int i = 0; i < this->m_info->size_h; i++) {
 		for (int j = 0; j < this->m_info->size_w; j++) {
 			if (this->m_info->chunks[i][j]->tp_chunk.render_flag == false)
@@ -147,6 +174,7 @@ void Transparent::render(
 		}
 	}
 	context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+	context->OMSetDepthStencilState(this->prev_ds_state.Get(), this->prev_ref);
 }
 
 ComPtr<ID3D11ShaderResourceView> Transparent::getAccum()
@@ -158,5 +186,3 @@ ComPtr<ID3D11ShaderResourceView> Transparent::getReveal()
 {
 	return this->d_buffer->getSRV(1);
 }
-
-

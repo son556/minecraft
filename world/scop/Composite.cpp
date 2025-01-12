@@ -124,10 +124,9 @@ void Composite::render(
 		0
 	);
 
-	this->d_graphic->renderBegin();
+	context->OMSetRenderTargets(1, solid_rtv.GetAddressOf(), nullptr);
 	context->PSSetShaderResources(0, 1, accum.GetAddressOf());
 	context->PSSetShaderResources(1, 1, reveal.GetAddressOf());
-	context->OMSetRenderTargets(1, solid_rtv.GetAddressOf(), nullptr);
 	context->DrawIndexed(
 		this->i_buffer->getCount(),
 		0, 0);
