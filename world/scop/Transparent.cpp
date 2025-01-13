@@ -47,6 +47,10 @@ Transparent::Transparent(
 	blend_desc.RenderTarget[1].BlendOp = D3D11_BLEND_OP_ADD;
 	blend_desc.RenderTarget[1].SrcBlend = D3D11_BLEND_ZERO;
 	blend_desc.RenderTarget[1].DestBlend = D3D11_BLEND_INV_SRC_COLOR;
+
+	blend_desc.RenderTarget[1].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blend_desc.RenderTarget[1].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blend_desc.RenderTarget[1].SrcBlendAlpha = D3D11_BLEND_ZERO;
 	blend_desc.RenderTarget[1].RenderTargetWriteMask =
 		D3D11_COLOR_WRITE_ENABLE_ALL;
 	HRESULT hr = device->CreateBlendState(&blend_desc,
@@ -73,7 +77,7 @@ Transparent::Transparent(
 	this->rasterizer_state = make_shared<RasterizerState>(
 		device,
 		D3D11_FILL_SOLID,
-		D3D11_CULL_NONE
+		D3D11_CULL_BACK
 	);
 	MVP mvp;
 	this->constant_buffer = make_shared<ConstantBuffer>(
@@ -132,7 +136,7 @@ void Transparent::setPipe()
 	context->PSSetSamplers(0, 1,
 		this->sampler_state->getComPtr().GetAddressOf());
 
-	float arr[4] = { 1, 1, 1, 1 };
+	float arr[4] = { 0, 0, 0, 0 };
 	context->OMSetBlendState(
 		this->blend_state.Get(),
 		arr,
