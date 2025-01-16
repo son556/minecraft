@@ -71,7 +71,7 @@ Composite::Composite(
 	blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 
 	blend_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blend_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	blend_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
 	blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blend_desc.RenderTarget[0].RenderTargetWriteMask =
 		D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -103,10 +103,9 @@ void Composite::setPipe()
 	);
 	context->PSSetSamplers(0, 1,
 		this->sampler_state->getComPtr().GetAddressOf());
-	float arr[4] = { 0, 0, 0, 0 };
 	context->OMSetBlendState(
 		this->blend_state.Get(),
-		arr,
+		nullptr,
 		0xFFFFFFFF
 	);
 }

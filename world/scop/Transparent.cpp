@@ -50,7 +50,7 @@ Transparent::Transparent(
 
 	blend_desc.RenderTarget[1].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blend_desc.RenderTarget[1].DestBlendAlpha = D3D11_BLEND_ZERO;
-	blend_desc.RenderTarget[1].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	blend_desc.RenderTarget[1].SrcBlendAlpha = D3D11_BLEND_ONE;
 	blend_desc.RenderTarget[1].RenderTargetWriteMask =
 		D3D11_COLOR_WRITE_ENABLE_ALL;
 	HRESULT hr = device->CreateBlendState(&blend_desc,
@@ -136,10 +136,9 @@ void Transparent::setPipe()
 	context->PSSetSamplers(0, 1,
 		this->sampler_state->getComPtr().GetAddressOf());
 
-	float arr[4] = { 0, 0, 0, 0 };
 	context->OMSetBlendState(
 		this->blend_state.Get(),
-		arr,
+		nullptr,
 		0xFFFFFFFF
 	);
 	context->OMSetDepthStencilState(this->ds_state.Get(), 0);
